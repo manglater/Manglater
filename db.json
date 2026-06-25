@@ -1,0 +1,11 @@
+﻿{
+  "purchases": {},
+  "assignedNumbers": [],
+  "admins": {
+    "admin": {
+      "password": "admin"
+    }
+  },
+  "adminTokens": {},
+  "nextTicketNumber": 1
+}
