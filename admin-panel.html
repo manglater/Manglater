@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - Manglater</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { margin-bottom: 20px; color: #333; }
+    .login-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .login-box input { padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+    .login-box button { padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .login-box button:hover { background: #0052a3; }
+    .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+    .status.ok { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .purchases { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .purchase-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .purchase-card h3 { margin: 10px 0; color: #333; }
+    .purchase-card p { margin: 5px 0; color: #666; font-size: 14px; }
+    .purchase-card img { max-width: 100%; height: auto; margin: 10px 0; border-radius: 4px; }
+    .btn-confirm { background: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+    .btn-confirm:hover { background: #218838; }
+    .btn-confirm:disabled { background: #ccc; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 Panel Administrativo - Manglater</h1>
+
+    <div class="login-box">
+      <h2>Iniciar Sesión</h2>
+      <input type="text" id="user" placeholder="Usuario" value="admin" />
+      <input type="password" id="pass" placeholder="Contraseña" value="admin" />
+      <button onclick="login()">Entrar</button>
+      <div id="statusMsg"></div>
+    </div>
+
+    <div id="adminArea" style="display:none">
+      <div class="status ok">✓ Sesión iniciada como <strong id="userDisplay">admin</strong></div>
+      <button onclick="logout()">Cerrar Sesión</button>
+      <button onclick="loadPurchases()">Refrescar Compras</button>
+
+      <h2 style="margin-top: 30px;">Compras Pendientes</h2>
+      <div id="purchases" class="purchases"></div>
+    </div>
+
+    <aside>
+      <section class="card">
+        <h3>Ver compras por cédula (cliente)</h3>
+        <div style="display:flex;gap:8px">
+          <input id="cedulaInput" placeholder="Cédula del cliente" />
+          <button id="btnCedula">Buscar</button>
+        </div>
+        <div id="cedulaResult" style="margin-top:8px"></div>
+      </section>
+
+      <section class="card">
+        <h3>Acciones rápidas</h3>
+        <button id="btnRefresh">Refrescar pendientes</button>
+        <div class="small" style="margin-top:8px">Nota: el panel usa el origen actual como base (window.location.origin).</div>
+      </section>
+    </aside>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000';
+    let token = null;
+
+    function login() {
+      const user = document.getElementById('user').value;
+      const pass = document.getElementById('pass').value;
+      const msg = document.getElementById('statusMsg');
+
+      fetch(API + '/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, password: pass })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          token = data.token;
+          localStorage.setItem('token', token);
+          document.getElementById('userDisplay').textContent = user;
+          document.getElementById('adminArea').style.display = 'block';
+          msg.innerHTML = '<div class="status ok">✓ Login correcto</div>';
+          loadPurchases();
+        } else {
+          msg.innerHTML = '<div class="status error">❌ ' + data.error + '</div>';
+        }
+      })
+      .catch(e => msg.innerHTML = '<div class="status error">❌ Error: ' + e.message + '</div>');
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      token = null;
+      document.getElementById('adminArea').style.display = 'none';
+      document.getElementById('statusMsg').innerHTML = '';
+    }
+
+    function loadPurchases() {
+      fetch(API + '/api/pending-purchases')
+      .then(r => r.json())
+      .then(data => {
+        const container = document.getElementById('purchases');
+        container.innerHTML = '';
+
+        if (!data.purchases || data.purchases.length === 0) {
+          container.innerHTML = '<p>No hay compras pendientes</p>';
+          return;
+        }
+
+        data.purchases.forEach(p => {
+          const img = p.comprobanteUrl ? '<img src="' + API + p.comprobanteUrl + '" />' : '';
+          const card = document.createElement('div');
+          card.className = 'purchase-card';
+          card.innerHTML = `
+            <h3>${p.nombre}</h3>
+            <p><strong>Cédula:</strong> ${p.cedula}</p>
+            <p><strong>Teléfono:</strong> ${p.celular}</p>
+            <p><strong>Email:</strong> ${p.email}</p>
+            <p><strong>Cantidad:</strong> ${p.cantidad} números</p>
+            <p><strong>Total:</strong> $${p.total}</p>
+            ${img}
+            <button class="btn-confirm" onclick="confirmarCompra('${p.id}')">✓ Confirmar Compra</button>
+          `;
+          container.appendChild(card);
+        });
+      })
+      .catch(e => alert('Error: ' + e.message));
+    }
+
+    function confirmarCompra(purchaseId) {
+      if (!token) { alert('No hay sesión'); return; }
+      if (!confirm('¿Confirmar esta compra y enviar boletas?')) return;
+
+      fetch(API + '/api/confirm-purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': token
+        },
+        body: JSON.stringify({ purchaseId: purchaseId })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          alert('✓ Compra confirmada. Boletas: ' + data.boletas.join(', '));
+          loadPurchases();
+        } else {
+          alert('❌ Error: ' + data.error);
+        }
+      })
+      .catch(e => alert('Error: ' + e.message));
+    }
+
+    // Cargar sesión si existe
+    window.addEventListener('load', function() {
+      const savedToken = localStorage.getItem('token');
+      if (savedToken) {
+        token = savedToken;
+        document.getElementById('adminArea').style.display = 'block';
+        loadPurchases();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Honda XR 150L 0KM - Manglater</title>
+  <meta name="description" content="Participa en el Sorteo de la Honda XR 150L 0KM.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/recibo.css">
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="wrap">
+      <span><i class="fa-solid fa-shield-halved"></i> 100% seguro y transparente</span>
+      <span><i class="fa-solid fa-bolt"></i> Números automáticos al instante</span>
+      <span><i class="fa-solid fa-envelope"></i> Confirmación por correo y WhatsApp</span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a href="#" class="logo">
+        <img src="images/LOGO MANGLATER.jpeg" id="logoPrincipal" class="logo__imagen" alt="logo">
+      </a>
+      <nav class="nav">
+        <ul class="nav__links">
+          <li><a href="#como-funciona">Cómo funciona</a></li>
+        </ul>
+        <div class="nav__actions">
+          <a href="javascript:void(0)" onclick="abrirModal()" class="btn btn--primary btn--sm">
+            <i class="fa-solid fa-ticket"></i> Ver mis números
+          </a>
+            <a href="https://wa.me/573017736812" target="_blank" rel="noopener noreferrer"  class="btn btn--ghost btn--sm">
+              <i class="fa-brands fa-whatsapp"></i> WhatsApp
+            </a>  
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero__grid">
+        <div class="hero__left">
+          <h1><em>Honda XR 150L</em> completamente nueva.</h1>
+          <p class="lead">100.000 números disponibles. Sorteo oficial con números únicos</p>
+          <div class="hero__actions">
+            <a href="#paquetes" class="btn btn--primary btn--sm">
+              <i class="fa-solid fa-ticket"></i> Comprar mis números
+            </a>
+            <a href="#como-funciona" class="btn btn--ghost">Cómo funciona</a>
+          </div>
+          <div class="trust-mini">
+            <span><i class="fa-solid fa-circle-check"></i> Números únicos garantizados</span>
+            <span><i class="fa-solid fa-circle-check"></i> Confirmación inmediata</span>
+          </div>
+        </div>
+
+        <div class="hero__panel">
+          <div class="panel-label">
+            <span class="name">vendidos</span>
+            <span class="live">En vivo</span>
+          </div>
+<div class="gauge-wrap">
+  <svg id="gauge" viewBox="0 0 220 160" width="220" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 20 140 A 90 90 0 1 1 200 140" fill="none" stroke="rgba(243,239,230,0.10)" stroke-width="14" stroke-linecap="round"/>
+    
+    <path id="gaugeProgress" d="M 20 140 A 90 90 0 1 1 200 140" fill="none"
+          stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"/>
+    
+    <line id="gaugeNeedle" x1="110" y1="110" x2="110" y2="40"
+          stroke="var(--parchment)" stroke-width="3" stroke-linecap="round"
+          style="transform-origin:110px 110px; transform:rotate(225deg); transition:transform 1.1s cubic-bezier(.2,.8,.2,1)"/>
+    
+
+    <circle cx="110" cy="110" r="6" fill="var(--parchment)"/>
+    
+    <defs>
+      <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="var(--trail-green)"/>
+        <stop offset="60%"  stop-color="var(--trail-gold)"/>
+        <stop offset="100%" stop-color="var(--honda-red)"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  
+  <div class="gauge-readout">
+    <div class="pct" id="gaugePct">0<span>%</span></div>
+    <div class="cap">vendido</div>
+  </div>
+</div>
+          <div class="gauge-foot">
+            <div><strong id="gaugeVendidos">0</strong><span>vendidos</span></div>
+            <div><strong>100.000</strong><span>total</span></div>
+            <div><strong id="gaugeDisponibles">100.000</strong><span>disponibles</span></div>
+          </div>
+          <div class="countdown-chip">
+            <span class="label"><i class="fa-solid fa-hourglass-half"></i> Fecha</span>
+            <span class="time" id="countdownTime">Calculando...</span>
+          </div>
+        </div>
+      </div>
+    </div> 
+
+  <div class="trust-strip">
+    <div class="wrap">
+      <div class="trust-item">
+        <i class="fa-solid fa-shield-halved"></i>
+        <div><b>Compra segura</b><small>Proceso de compra 100% segura</small></div>
+      </div>
+      <div class="trust-item">
+        <i class="fa-solid fa-bolt"></i>
+        <div><b>Al instante</b><small>Números asignados automáticamente</small></div>
+      </div>
+      <div class="trust-item">
+        <i class="fa-solid fa-envelope"></i>
+        <div><b>Confirmación por email</b><small>Resumen completo de tu compra</small></div>
+      </div>
+      <div class="trust-item">
+        <i class="fa-brands fa-whatsapp"></i>
+        <div><b>Soporte WhatsApp</b><small>Respuesta en minutos</small></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="como-funciona">
+    <div class="wrap">
+      <div class="section__head reveal">
+        <p class="eyebrow">El proceso</p>
+        <h2 class="section__title">Comprar es rápido y seguro.</h2>
+        <p class="section__sub">En 3 pasos tienes tus números y un correo de confirmación en tu bandeja.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step__num">01</div>
+          <h3>Elige tu paquete</h3>
+          <p>Selecciona cuántos números quieres. A más números, menor precio por unidad.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step__num">02</div>
+          <h3>Realiza tu pago</h3>
+          <p>Sube tu comprobante aquí mismo.</p>
+        </div>
+        <div class="step reveal">
+          <div class="step__num">03</div>
+          <h3>Recibe tus números</h3>
+          <p>El sistema asigna tus números automáticamente. Te llegan al correo y WhatsApp al instante.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight" id="paquetes">
+    <div class="wrap">
+      <div class="section__head reveal">
+        <p class="eyebrow">Paquetes</p>
+        <h2 class="section__title">Más números, mejor precio por unidad.</h2>
+        <p class="section__sub">Selecciona una opción o calcula una cantidad personalizada.</p>
+      </div>
+
+      <div class="packages">
+        <div class="package-card reveal" data-qty="5" data-price="7500" onclick="selectPackage(event)">
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">5 <small>números</small></div>
+          <div class="package-card__price">$7.500</div>
+          <div class="package-card__unit">$1.500 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="10" data-price="14000" onclick="selectPackage(event)">
+          <span class="package-card__badge">Promoción</span>
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">10 <small>números</small></div>
+          <div class="package-card__price">$14.000</div>
+          <div class="package-card__unit">$1.400 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="20" data-price="26000" onclick="selectPackage(event)">
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">20 <small>números</small></div>
+          <div class="package-card__price">$26.000</div>
+          <div class="package-card__unit">$1.300 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="30" data-price="36000" onclick="selectPackage(event)">
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">30 <small>números</small></div>
+          <div class="package-card__price">$36.000</div>
+          <div class="package-card__unit">$1.200 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="50" data-price="55000" onclick="selectPackage(event)">
+          <span class="package-card__badge" style="background:var(--honda-red);color:#fff;">Popular</span>
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">50 <small>números</small></div>
+          <div class="package-card__price">$55.000</div>
+          <div class="package-card__unit">$1.100 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="100" data-price="100000" onclick="selectPackage(event)">
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">100 <small>números</small></div>
+          <div class="package-card__price">$100.000</div>
+          <div class="package-card__unit">$1.000 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="200" data-price="180000" onclick="selectPackage(event)">
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">150 <small>números</small></div>
+          <div class="package-card__price">$190.000</div>
+          <div class="package-card__unit">$900 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="500" data-price="400000" onclick="selectPackage(event)">
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">500 <small>números</small></div>
+          <div class="package-card__price">$400.000</div>
+          <div class="package-card__unit">$800 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="1000" data-price="700000" onclick="selectPackage(event)">
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">1.000 <small>números</small></div>
+          <div class="package-card__price">$700.000</div>
+          <div class="package-card__unit">$700 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="5000" data-price="3000000" onclick="selectPackage(event)">
+          <span class="package-card__badge" style="background:#e8a33d;color:#1a1304;">Mayorista</span>
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">5.000 <small>números</small></div>
+          <div class="package-card__price">$3.000.000</div>
+          <div class="package-card__unit">$600 c/u</div>
+        </div>
+      </div>
+
+      <div class="custom-calc reveal">
+        <div>
+          <label for="customQty">¿Otra cantidad?</label>
+          <input type="number" id="customQty" min="1" placeholder="Ej. 150">
+        </div>
+        <button class="btn btn--ghost btn--sm" onclick="calculateCustom()">Calcular total</button>
+      </div>
+
+      <div class="summary-bar reveal" id="summaryBar" style="display:none;">
+        <div class="qty">Números seleccionados <b id="summaryQty">0</b></div>
+        <div class="total" id="summaryTotal">$0</div>
+        <button type="button" id="btn-continuar" class="btn btn--primary btn--sm" style="border:none;">
+          Continuar con mis datos <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <div class="checkout-section" id="checkoutSection" style="display:none;">
+        <div class="checkout-grid">
+          <div class="checkout-card">
+            <h3>1. Tus Datos</h3>
+            <form id="formulario-pago" novalidate>
+              <div class="form-group">
+                <label for="nombre">Nombre Completo *</label>
+                <input type="text" id="nombre" required placeholder="Ej. María García">
+              </div>
+
+              <div class="form-group">
+                <label for="cedula">Cédula *</label>
+                <input type="text" id="cedula" required placeholder="Ej. 1234567890">
+              </div>
+
+              <div class="form-group">
+                <label for="celular">Celular / WhatsApp *</label>
+                <input type="tel" id="celular" required placeholder="Ej. 3001234567">
+              </div>
+
+              <div class="form-group">
+                <label for="email">Correo Electrónico *</label>
+                <input type="email" id="email" required placeholder="Ej. maria@correo.com">
+              </div>
+
+              <div class="form-group">
+                <label for="emailConfirm">Confirmar Correo *</label>
+                <input type="email" id="emailConfirm" required placeholder="Repite tu correo">
+              </div>
+            </form>
+          </div>
+
+          <div class="checkout-card" style="text-align:center;">
+            <h3>2. Realiza tu Pago</h3>
+            <p style="color:var(--dust); font-size:0.9rem;">
+              Total a pagar: <strong id="pagoTotalText" style="color:var(--parchment); font-size:1.1rem;">$0</strong>
+            </p>
+
+            <div class="qr-box">
+              <img src="images/QR DE PAGO.jpeg" alt="QR de pago" style="max-width:160px; border-radius:8px;"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+              <div style="display:none; width:160px; height:160px; background:#f0f0f0; border-radius:8px;
+                          align-items:center; justify-content:center; color:#666; font-size:0.8rem; text-align:center; padding:10px;">
+                <div><i class="fa-solid fa-qrcode" style="font-size:2rem; color:#ccc; display:block; margin-bottom:8px;"></i>
+                Aquí va tu QR de pago</div>
+              </div>
+            </div>
+
+            <div class="transfer-box" style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.05); border-radius:8px;">
+              <p style="margin:0 0 10px 0;">O transfiere a la Llave Bancolombia:</p>
+              <b style="font-size:1.2rem;">@3006839944</b>
+            </div>
+
+            <div class="file-upload-wrapper" style="margin-top:20px;">
+              <input type="file" id="comprobante" accept="image/*,application/pdf" form="formulario-pago">
+              <div class="file-upload-label">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Adjuntar Comprobante de Pago
+              </div>
+            </div>
+            <div id="comprobantePreview" style="display:none; margin-top:15px; text-align:center;">
+               <p style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">Comprobante seleccionado:</p>
+                  <img id="comprobantePreviewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--line);">
+            </div>
+            <button type="submit" form="formulario-pago" class="btn btn--primary btn--block" style="margin-top:20px;">
+              <i class="fa-solid fa-lock"></i> Confirmar Compra
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="premio">
+    <div class="wrap">
+      <div class="section__head reveal center">
+        <p class="eyebrow"></p>
+        <h2 class="section__title">Conoce la Honda XR 150L.</h2>
+        <p class="section__sub">La compañera perfecta para la ciudad y la trocha. Totalmente nueva y lista para rodar.</p>
+      </div>
+
+      <div class="prize__grid reveal">
+        <div class="photo-slot">
+          <img src="images/HONDA XR 150.jpg" alt="Boxer CT 100 KS">
+        </div>
+
+        <div class="spec-sheet">
+          <div class="spec-sheet__head">
+            <b>Ficha Técnica</b>
+            <span>Modelo 2026</span>
+          </div>
+          <div class="spec-row">
+            <span>Motor</span>
+            <span>149.1 cc</span>
+          </div>
+          <div class="spec-row">
+            <span>Transmisión</span>
+            <span>5 velocidades</span>
+          </div>
+          <div class="spec-row">
+            <span>Frenos (Del/Tras)</span>
+            <span>Disco / Tambor</span>
+          </div>
+          <div class="spec-row">
+            <span>Capacidad Tanque</span>
+            <span>12 Litros</span>
+          </div>
+          <div class="spec-row">
+            <span>Arranque</span>
+            <span>Eléctrico y Pedal</span>
+          </div>
+          <div class="spec-note">
+            * El vehículo se entrega con matrícula, SOAT y tecnomecánica al día a nombre del ganador del sorteo oficial.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="#" class="logo">
+            <span class="logo__mark"><i class="fa-solid fa-motorcycle"></i></span>
+          </a>
+          <p>Transparente y verificable con resultado oficial.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Navegación</h4>
+          <ul>
+            <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#paquetes">Paquetes</a></li>
+            
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Términos y Condiciones</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Contacto</h4>
+          <ul>
+            <li><i class="fa-brands fa-whatsapp"></i> +57 301 773 6812</li>
+            <li><i class="fa-solid fa-envelope"></i> Manglater1225@gmail.com</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Todos los derechos reservados.</span>
+        <span>Hecho con ❤️ en Colombia</span>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/573017736812" target="_blank">WhatsApp</a>
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <style>
+    .modal-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(15, 15, 20, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      justify-content: center; align-items: center;
+    }
+    .modal-content {
+      background-color: #1a1c23; padding: 30px; border-radius: 12px;
+      width: 90%; max-width: 400px; text-align: center;
+      border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      position: relative; color: #fff;
+    }
+    .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #888; transition: 0.3s; }
+    .close-btn:hover { color: #e53935; }
+    .modal-title { margin-top: 0; font-size: 1.5rem; }
+    .modal-text { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; }
+    .input-dark { width: 100%; padding: 12px; margin-bottom: 15px; background-color: #0d0e12; border: 1px solid #333; border-radius: 8px; color: #fff; outline: none; box-sizing: border-box; }
+    .input-dark:focus { border-color: #e53935; }
+    .btn-primary-modal { background-color: #c92a2a; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+    .btn-primary-modal:hover { background-color: #b02525; }
+  </style>
+
+  <div id="modalConsulta" class="modal-overlay">
+    <div class="modal-content">
+      <span class="close-btn" onclick="cerrarModal()">&times;</span>
+      <h3 class="modal-title">Consultar mi compra</h3>
+      <p class="modal-text">Ingresa tu número de teléfono para ver tus números asignados.</p>
+      
+      <input type="text" id="inputPhone" placeholder="Tu número de WhatsApp..." class="input-dark">
+      <button id="btnSearch" class="btn-primary-modal">Buscar números</button>
+
+      <div id="resultadoBusqueda" style="display: none; margin-top: 20px; text-align: left; background: #0d0e12; padding: 15px; border-radius: 8px; border: 1px solid #333;">
+        <h4 style="margin: 0 0 10px; color: #e8a33d; font-family: 'Oswald', sans-serif;">Números Encontrados:</h4>
+        <p id="numerosBoleto" style="margin: 0; font-size: 1.4rem; font-family: 'JetBrains Mono', monospace; color: #fff; word-wrap: break-word;"></p>
+        <span style="color: #5c8a5f; display: flex; align-items: center; gap: 5px; margin-top: 12px; font-size: 0.85rem;">
+          <i class="fa-solid fa-circle-check"></i> Pago verificado y números activos
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function abrirModal() {
+      const modal = document.getElementById('modalConsulta');
+      if (modal) modal.style.display = 'flex';
+    }
+    
+    function cerrarModal() {
+      const modal = document.getElementById('modalConsulta');
+      if (modal) {
+        modal.style.display = 'none';
+        document.getElementById('inputPhone').value = '';
+        document.getElementById('resultadoBusqueda').style.display = 'none';
+      }
+    }
+
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('modalConsulta');
+      if (event.target === modal) cerrarModal();
+    });
+
+document.getElementById('btnSearch').addEventListener('click', async function() {
+  const phoneInput = document.getElementById('inputPhone').value.trim();
+  const btn = document.getElementById('btnSearch');
+  const cajaResultado = document.getElementById('resultadoBusqueda');
+  const textoNumeros = document.getElementById('numerosBoleto');
+
+  if (phoneInput === "") {
+    alert("Por favor, ingresa un número de teléfono.");
+    return;
+  }
+
+  btn.textContent = "Buscando en el sistema...";
+  btn.disabled = true;
+  cajaResultado.style.display = 'none';
+
+  try {
+
+    const response = await fetch(`/api/my-purchases?cedula=${phoneInput}`);
+    const result = await response.json();
+
+    if (!result.ok || !result.purchases || result.purchases.length === 0) {
+      textoNumeros.textContent = "No se encontraron números para este número.";
+      cajaResultado.style.display = 'block';
+      btn.textContent = "Buscar números";
+      btn.disabled = false;
+      return;
+    }
+
+
+    const boletasConfirmadas = result.purchases
+      .filter(p => p.status === 'confirmed' && p.boletas && p.boletas.length > 0)
+      .flatMap(p => p.boletas)
+      .map(b => String(b).padStart(4, '0'))
+      .join(', ');
+
+    if (boletasConfirmadas) {
+      textoNumeros.textContent = boletasConfirmadas;
+    } else {
+      textoNumeros.textContent = "Tienes compras pendientes de verificación. No hay números asignados aún.";
+    }
+
+    cajaResultado.style.display = 'block';
+  } catch (error) {
+    console.error('Error:', error);
+    textoNumeros.textContent = "Error al buscar. Intenta de nuevo.";
+    cajaResultado.style.display = 'block';
+  }
+
+  btn.textContent = "Buscar números";
+  btn.disabled = false;
+});
+  </script>
+
+
+  <script src="app.js"></script>
+
+</body>
+</html>
