@@ -37,9 +37,9 @@
           <a href="javascript:void(0)" onclick="abrirModal()" class="btn btn--primary btn--sm">
             <i class="fa-solid fa-ticket"></i> Ver mis números
           </a>
-            <a href="https://wa.me/573017736812" target="_blank" rel="noopener noreferrer"  class="btn btn--ghost btn--sm">
-              <i class="fa-brands fa-whatsapp"></i> WhatsApp
-            </a>  
+          <a href="https://wa.me/573017736812" target="_blank" rel="noopener noreferrer" class="btn btn--ghost btn--sm">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp
+          </a>
         </div>
       </nav>
     </div>
@@ -68,34 +68,29 @@
             <span class="name">vendidos</span>
             <span class="live">En vivo</span>
           </div>
-<div class="gauge-wrap">
-  <svg id="gauge" viewBox="0 0 220 160" width="220" xmlns="http://www.w3.org/2000/svg">
-    <path d="M 20 140 A 90 90 0 1 1 200 140" fill="none" stroke="rgba(243,239,230,0.10)" stroke-width="14" stroke-linecap="round"/>
-    
-    <path id="gaugeProgress" d="M 20 140 A 90 90 0 1 1 200 140" fill="none"
-          stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"/>
-    
-    <line id="gaugeNeedle" x1="110" y1="110" x2="110" y2="40"
-          stroke="var(--parchment)" stroke-width="3" stroke-linecap="round"
-          style="transform-origin:110px 110px; transform:rotate(225deg); transition:transform 1.1s cubic-bezier(.2,.8,.2,1)"/>
-    
+          <div class="gauge-wrap">
+            <svg id="gauge" viewBox="0 0 220 160" width="220" xmlns="http://www.w3.org/2000/svg">
+              <path d="M 20 140 A 90 90 0 1 1 200 140" fill="none" stroke="rgba(243,239,230,0.10)" stroke-width="14" stroke-linecap="round"/>
+              <path id="gaugeProgress" d="M 20 140 A 90 90 0 1 1 200 140" fill="none"
+                    stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"/>
+              <line id="gaugeNeedle" x1="110" y1="110" x2="110" y2="40"
+                    stroke="var(--parchment)" stroke-width="3" stroke-linecap="round"
+                    style="transform-origin:110px 110px; transform:rotate(225deg); transition:transform 1.1s cubic-bezier(.2,.8,.2,1)"/>
+              <circle cx="110" cy="110" r="6" fill="var(--parchment)"/>
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="var(--trail-green)"/>
+                  <stop offset="60%" stop-color="var(--trail-gold)"/>
+                  <stop offset="100%" stop-color="var(--honda-red)"/>
+                </linearGradient>
+              </defs>
+            </svg>
 
-    <circle cx="110" cy="110" r="6" fill="var(--parchment)"/>
-    
-    <defs>
-      <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%"   stop-color="var(--trail-green)"/>
-        <stop offset="60%"  stop-color="var(--trail-gold)"/>
-        <stop offset="100%" stop-color="var(--honda-red)"/>
-      </linearGradient>
-    </defs>
-  </svg>
-  
-  <div class="gauge-readout">
-    <div class="pct" id="gaugePct">0<span>%</span></div>
-    <div class="cap">vendido</div>
-  </div>
-</div>
+            <div class="gauge-readout">
+              <div class="pct" id="gaugePct">0<span>%</span></div>
+              <div class="cap">vendido</div>
+            </div>
+          </div>
           <div class="gauge-foot">
             <div><strong id="gaugeVendidos">0</strong><span>vendidos</span></div>
             <div><strong>100.000</strong><span>total</span></div>
@@ -107,28 +102,29 @@
           </div>
         </div>
       </div>
-    </div> 
+    </div>
 
-  <div class="trust-strip">
-    <div class="wrap">
-      <div class="trust-item">
-        <i class="fa-solid fa-shield-halved"></i>
-        <div><b>Compra segura</b><small>Proceso de compra 100% segura</small></div>
-      </div>
-      <div class="trust-item">
-        <i class="fa-solid fa-bolt"></i>
-        <div><b>Al instante</b><small>Números asignados automáticamente</small></div>
-      </div>
-      <div class="trust-item">
-        <i class="fa-solid fa-envelope"></i>
-        <div><b>Confirmación por email</b><small>Resumen completo de tu compra</small></div>
-      </div>
-      <div class="trust-item">
-        <i class="fa-brands fa-whatsapp"></i>
-        <div><b>Soporte WhatsApp</b><small>Respuesta en minutos</small></div>
+    <div class="trust-strip">
+      <div class="wrap">
+        <div class="trust-item">
+          <i class="fa-solid fa-shield-halved"></i>
+          <div><b>Compra segura</b><small>Proceso de compra 100% segura</small></div>
+        </div>
+        <div class="trust-item">
+          <i class="fa-solid fa-bolt"></i>
+          <div><b>Al instante</b><small>Números asignados automáticamente</small></div>
+        </div>
+        <div class="trust-item">
+          <i class="fa-solid fa-envelope"></i>
+          <div><b>Confirmación por email</b><small>Resumen completo de tu compra</small></div>
+        </div>
+        <div class="trust-item">
+          <i class="fa-brands fa-whatsapp"></i>
+          <div><b>Soporte WhatsApp</b><small>Respuesta en minutos</small></div>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <section class="section" id="como-funciona">
     <div class="wrap">
@@ -212,8 +208,8 @@
 
         <div class="package-card reveal" data-qty="200" data-price="180000" onclick="selectPackage(event)">
           <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">150 <small>números</small></div>
-          <div class="package-card__price">$190.000</div>
+          <div class="package-card__qty">200 <small>números</small></div>
+          <div class="package-card__price">$180.000</div>
           <div class="package-card__unit">$900 c/u</div>
         </div>
 
@@ -316,8 +312,8 @@
               </div>
             </div>
             <div id="comprobantePreview" style="display:none; margin-top:15px; text-align:center;">
-               <p style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">Comprobante seleccionado:</p>
-                  <img id="comprobantePreviewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--line);">
+              <p style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">Comprobante seleccionado:</p>
+              <img id="comprobantePreviewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--line);">
             </div>
             <button type="submit" form="formulario-pago" class="btn btn--primary btn--block" style="margin-top:20px;">
               <i class="fa-solid fa-lock"></i> Confirmar Compra
@@ -338,7 +334,7 @@
 
       <div class="prize__grid reveal">
         <div class="photo-slot">
-          <img src="images/HONDA XR 150.jpg" alt="Boxer CT 100 KS">
+          <img src="images/HONDA XR 150.jpg" alt="Honda XR 150L 0KM">
         </div>
 
         <div class="spec-sheet">
@@ -388,7 +384,6 @@
           <ul>
             <li><a href="#como-funciona">Cómo funciona</a></li>
             <li><a href="#paquetes">Paquetes</a></li>
-            
           </ul>
         </div>
         <div class="footer__col">
@@ -412,8 +407,8 @@
     </div>
   </footer>
 
-  <a href="https://wa.me/573017736812" target="_blank">WhatsApp</a>
-    <i class="fa-brands fa-whatsapp"></i>
+  <a href="https://wa.me/573017736812" target="_blank" rel="noopener noreferrer">
+    <i class="fa-brands fa-whatsapp"></i> WhatsApp
   </a>
 
   <style>
@@ -445,9 +440,9 @@
     <div class="modal-content">
       <span class="close-btn" onclick="cerrarModal()">&times;</span>
       <h3 class="modal-title">Consultar mi compra</h3>
-      <p class="modal-text">Ingresa tu número de teléfono para ver tus números asignados.</p>
-      
-      <input type="text" id="inputPhone" placeholder="Tu número de WhatsApp..." class="input-dark">
+      <p class="modal-text">Ingresa tu número de cédula para ver tus números asignados.</p>
+
+      <input type="text" id="inputCedula" placeholder="Tu número de cédula..." class="input-dark">
       <button id="btnSearch" class="btn-primary-modal">Buscar números</button>
 
       <div id="resultadoBusqueda" style="display: none; margin-top: 20px; text-align: left; background: #0d0e12; padding: 15px; border-radius: 8px; border: 1px solid #333;">
@@ -465,12 +460,12 @@
       const modal = document.getElementById('modalConsulta');
       if (modal) modal.style.display = 'flex';
     }
-    
+
     function cerrarModal() {
       const modal = document.getElementById('modalConsulta');
       if (modal) {
         modal.style.display = 'none';
-        document.getElementById('inputPhone').value = '';
+        document.getElementById('inputCedula').value = '';
         document.getElementById('resultadoBusqueda').style.display = 'none';
       }
     }
@@ -480,61 +475,57 @@
       if (event.target === modal) cerrarModal();
     });
 
-document.getElementById('btnSearch').addEventListener('click', async function() {
-  const phoneInput = document.getElementById('inputPhone').value.trim();
-  const btn = document.getElementById('btnSearch');
-  const cajaResultado = document.getElementById('resultadoBusqueda');
-  const textoNumeros = document.getElementById('numerosBoleto');
+    document.getElementById('btnSearch').addEventListener('click', async function() {
+      const cedulaInput = document.getElementById('inputCedula').value.trim();
+      const btn = document.getElementById('btnSearch');
+      const cajaResultado = document.getElementById('resultadoBusqueda');
+      const textoNumeros = document.getElementById('numerosBoleto');
 
-  if (phoneInput === "") {
-    alert("Por favor, ingresa un número de teléfono.");
-    return;
-  }
+      if (cedulaInput === "") {
+        alert("Por favor, ingresa un número de cédula.");
+        return;
+      }
 
-  btn.textContent = "Buscando en el sistema...";
-  btn.disabled = true;
-  cajaResultado.style.display = 'none';
+      btn.textContent = "Buscando en el sistema...";
+      btn.disabled = true;
+      cajaResultado.style.display = 'none';
 
-  try {
+      try {
+        const response = await fetch(`/api/my-purchases?cedula=${encodeURIComponent(cedulaInput)}`);
+        const result = await response.json();
 
-    const response = await fetch(`/api/my-purchases?cedula=${phoneInput}`);
-    const result = await response.json();
+        if (!result.ok || !result.purchases || result.purchases.length === 0) {
+          textoNumeros.textContent = "No se encontraron números para esta cédula.";
+          cajaResultado.style.display = 'block';
+          btn.textContent = "Buscar números";
+          btn.disabled = false;
+          return;
+        }
 
-    if (!result.ok || !result.purchases || result.purchases.length === 0) {
-      textoNumeros.textContent = "No se encontraron números para este número.";
-      cajaResultado.style.display = 'block';
+        const boletasConfirmadas = result.purchases
+          .filter(p => p.status === 'confirmed' && p.boletas && p.boletas.length > 0)
+          .flatMap(p => p.boletas)
+          .map(b => String(b).padStart(4, '0'))
+          .join(', ');
+
+        if (boletasConfirmadas) {
+          textoNumeros.textContent = boletasConfirmadas;
+        } else {
+          textoNumeros.textContent = "Tienes compras pendientes de verificación. No hay números asignados aún.";
+        }
+
+        cajaResultado.style.display = 'block';
+      } catch (error) {
+        console.error('Error:', error);
+        textoNumeros.textContent = "Error al buscar. Intenta de nuevo.";
+        cajaResultado.style.display = 'block';
+      }
+
       btn.textContent = "Buscar números";
       btn.disabled = false;
-      return;
-    }
-
-
-    const boletasConfirmadas = result.purchases
-      .filter(p => p.status === 'confirmed' && p.boletas && p.boletas.length > 0)
-      .flatMap(p => p.boletas)
-      .map(b => String(b).padStart(4, '0'))
-      .join(', ');
-
-    if (boletasConfirmadas) {
-      textoNumeros.textContent = boletasConfirmadas;
-    } else {
-      textoNumeros.textContent = "Tienes compras pendientes de verificación. No hay números asignados aún.";
-    }
-
-    cajaResultado.style.display = 'block';
-  } catch (error) {
-    console.error('Error:', error);
-    textoNumeros.textContent = "Error al buscar. Intenta de nuevo.";
-    cajaResultado.style.display = 'block';
-  }
-
-  btn.textContent = "Buscar números";
-  btn.disabled = false;
-});
+    });
   </script>
 
-
   <script src="app.js"></script>
-
 </body>
 </html>
