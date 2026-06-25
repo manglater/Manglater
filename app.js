@@ -5,7 +5,7 @@ let selectedPrice = 0;
 // ── INICIALIZACIÓN ──────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   console.log('✓ App inicializado');
-  
+
   actualizarMedidores();
   setupScrollReveal();
   updateCountdown();
@@ -16,16 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── ACTUALIZACIÓN DE MEDIDORES ──────────────
-
 async function actualizarMedidores() {
   try {
     const r = await fetch('/api/stats');
     const data = await r.json();
-    if (!data.ok) throw new Error(data.error || 'stats error');
 
-    const vendidos = data.vendidos;
-    const disponibles = data.disponibles;
-    const porcentaje = data.porcentaje;
+    if (!r.ok || !data.ok) {
+      throw new Error(data?.error || 'Error cargando estadísticas');
+    }
+
+    const vendidos = data.vendidos ?? 0;
+    const disponibles = data.disponibles ?? 0;
+    const porcentaje = data.porcentaje ?? 0;
 
     const gaugeProgress = document.getElementById('gaugeProgress');
     const gaugePct = document.getElementById('gaugePct');
@@ -52,18 +54,19 @@ async function actualizarMedidores() {
     console.error('Error cargando medidor:', e);
   }
 }
+
 // ── SELECCIÓN DE PAQUETES ───────────────────
 function selectPackage(event) {
   event.preventDefault();
   const element = event.currentTarget;
-  
+
   document.querySelectorAll('.package-card').forEach(card => {
     card.classList.remove('is-selected');
   });
 
   element.classList.add('is-selected');
-  selectedQuantity = parseInt(element.dataset.qty);
-  selectedPrice = parseInt(element.dataset.price);
+  selectedQuantity = parseInt(element.dataset.qty, 10);
+  selectedPrice = parseInt(element.dataset.price, 10);
   selectedPackage = element;
 
   console.log(`📦 Paquete: ${selectedQuantity} números por $${selectedPrice}`);
@@ -73,7 +76,7 @@ function selectPackage(event) {
 // ── CÁLCULO PERSONALIZADO ───────────────────
 function calculateCustom() {
   const input = document.getElementById('customQty');
-  const cantidad = parseInt(input.value);
+  const cantidad = parseInt(input.value, 10);
 
   if (!cantidad || cantidad < 1) {
     mostrarToast('❌ Ingresa una cantidad válida', 'error');
@@ -104,15 +107,14 @@ function mostrarResumen() {
   const pagoTotalText = document.getElementById('pagoTotalText');
 
   if (selectedQuantity > 0) {
-    summaryQty.textContent = selectedQuantity;
-    summaryTotal.textContent = '$' + selectedPrice.toLocaleString('es-CO');
-    
-    if (pagoTotalText) {
-      pagoTotalText.textContent = '$' + selectedPrice.toLocaleString('es-CO');
+    if (summaryQty) summaryQty.textContent = selectedQuantity;
+    if (summaryTotal) summaryTotal.textContent = '$' + selectedPrice.toLocaleString('es-CO');
+    if (pagoTotalText) pagoTotalText.textContent = '$' + selectedPrice.toLocaleString('es-CO');
+
+    if (summaryBar) {
+      summaryBar.style.display = 'flex';
+      summaryBar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-    
-    summaryBar.style.display = 'flex';
-    summaryBar.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
 
@@ -156,7 +158,7 @@ async function handleFormSubmit(e) {
   const email = document.getElementById('email')?.value.trim();
   const emailConfirm = document.getElementById('emailConfirm')?.value.trim();
   const comprobanteInput = document.getElementById('comprobante');
-  const comprobante = comprobanteInput?.files[0];
+  const comprobante = comprobanteInput?.files?.[0];
 
   if (!nombre || !cedula || !celular) {
     mostrarToast('❌ Por favor completa todos los campos requeridos (*)', 'error');
@@ -180,6 +182,7 @@ async function handleFormSubmit(e) {
 
   const btn = e.target.querySelector('button[type="submit"]');
   const textoOriginal = btn?.textContent || 'Confirmar Compra';
+
   if (btn) {
     btn.disabled = true;
     btn.textContent = '⏳ Procesando...';
@@ -201,13 +204,13 @@ async function handleFormSubmit(e) {
       body: formData
     });
 
-    const result = await response.json();
+    const result = await response.json().catch(() => ({}));
 
-    if (!result.ok) {
+    if (!response.ok || !result.ok) {
       throw new Error(result.error || 'Error al crear la compra');
     }
 
-    const purchaseId = result.purchaseId || result.id;
+    const purchaseId = result.purchaseId || result.id || 'N/A';
 
     mostrarRecibo(`
       <h2>✅ Compra Registrada</h2>
@@ -225,13 +228,21 @@ async function handleFormSubmit(e) {
     e.target.reset();
     selectedQuantity = 0;
     selectedPrice = 0;
-    
+    selectedPackage = null;
+
+    document.querySelectorAll('.package-card').forEach(card => {
+      card.classList.remove('is-selected');
+    });
+
     const previewWrap = document.getElementById('comprobantePreview');
+    const previewImg = document.getElementById('comprobantePreviewImg');
+
     if (previewWrap) previewWrap.style.display = 'none';
-    
+    if (previewImg) previewImg.src = '';
+
     const summaryBar = document.getElementById('summaryBar');
     if (summaryBar) summaryBar.style.display = 'none';
-    
+
     const checkoutSection = document.getElementById('checkoutSection');
     if (checkoutSection) checkoutSection.style.display = 'none';
 
@@ -370,7 +381,8 @@ function setupFilePreview() {
   }
 
   fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
+    const file = fileInput.files?.[0];
+
     if (!file) {
       if (previewWrap) previewWrap.style.display = 'none';
       if (previewImg) previewImg.src = '';
@@ -378,16 +390,20 @@ function setupFilePreview() {
     }
 
     const maxMB = 10;
+
     if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
       mostrarToast('❌ Por favor sube una imagen (jpg, png) o PDF.', 'error');
       fileInput.value = '';
       if (previewWrap) previewWrap.style.display = 'none';
+      if (previewImg) previewImg.src = '';
       return;
     }
+
     if (file.size > maxMB * 1024 * 1024) {
       mostrarToast(`❌ El comprobante no puede superar ${maxMB} MB.`, 'error');
       fileInput.value = '';
       if (previewWrap) previewWrap.style.display = 'none';
+      if (previewImg) previewImg.src = '';
       return;
     }
 
@@ -399,6 +415,7 @@ function setupFilePreview() {
       };
       reader.readAsDataURL(file);
     } else if (previewWrap) {
+      if (previewImg) previewImg.src = '';
       previewWrap.style.display = 'block';
     }
   });
