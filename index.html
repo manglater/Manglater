@@ -3,35 +3,254 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Honda XR 150L 0KM - Manglater</title>
-  <meta name="description" content="Participa en el Sorteo de la Honda XR 150L 0KM.">
+  <title>Manglater | Honda XR 150L 0KM</title>
+  <meta name="description" content="Participa en el sorteo de la Honda XR 150L 0KM con Manglater. Compra tus números y elige selección automática o manual.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <link rel="stylesheet" href="assets/css/main.css">
   <link rel="stylesheet" href="assets/css/recibo.css">
+  <link rel="icon" href="images/favicon.ico">
+
+  <style>
+    .manual-picker-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(232,163,61,0.25);
+      border-radius: 18px;
+    }
+
+    .manual-picker-top {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .manual-number-input {
+      flex: 1;
+      min-width: 220px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(232,163,61,0.25);
+      background: rgba(10,10,10,0.35);
+      color: #fff;
+      outline: none;
+      font-size: 1rem;
+    }
+
+    .manual-number-input:focus {
+      border-color: #e8a33d;
+      box-shadow: 0 0 0 3px rgba(232,163,61,0.12);
+    }
+
+    .manual-counter {
+      margin-top: 16px;
+      color: #e8a33d;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .manual-tickets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .manual-ticket {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      padding: 18px 16px;
+      background: linear-gradient(135deg, #f5d27a 0%, #dca43a 48%, #b97a17 100%);
+      color: #2d1b00;
+      box-shadow:
+        0 10px 24px rgba(0,0,0,0.28),
+        inset 0 1px 0 rgba(255,255,255,0.4);
+      border: 1px solid rgba(120, 73, 0, 0.35);
+    }
+
+    .manual-ticket::before,
+    .manual-ticket::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      background: #16181d;
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+
+    .manual-ticket::before { left: -9px; }
+    .manual-ticket::after { right: -9px; }
+
+    .manual-ticket__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+    }
+
+    .manual-ticket__label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .manual-ticket__number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.9rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .manual-ticket__foot {
+      font-size: 0.78rem;
+      font-weight: 700;
+      opacity: 0.8;
+    }
+
+    .manual-ticket__remove {
+      border: none;
+      background: rgba(45,27,0,0.12);
+      color: #2d1b00;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s ease;
+    }
+
+    .manual-ticket__remove:hover {
+      background: rgba(45,27,0,0.22);
+      transform: scale(1.06);
+    }
+
+    .whatsapp-float {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #25d366;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 1.6rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.28);
+      z-index: 999;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .whatsapp-float:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 14px 28px rgba(0,0,0,0.35);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(15, 15, 20, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      justify-content: center; align-items: center;
+    }
+
+    .modal-content {
+      background-color: #1a1c23; padding: 30px; border-radius: 12px;
+      width: 90%; max-width: 400px; text-align: center;
+      border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      position: relative; color: #fff;
+    }
+
+    .close-btn {
+      position: absolute; top: 15px; right: 20px;
+      font-size: 28px; cursor: pointer; color: #888; transition: 0.3s;
+    }
+
+    .close-btn:hover { color: #e53935; }
+    .modal-title { margin-top: 0; font-size: 1.5rem; }
+    .modal-text { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; }
+
+    .input-dark {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      background-color: #0d0e12;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .input-dark:focus { border-color: #e53935; }
+
+    .btn-primary-modal {
+      background-color: #c92a2a;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+    .btn-primary-modal:hover { background-color: #b02525; }
+
+    @media (max-width: 768px) {
+      .manual-picker-top {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .manual-number-input {
+        width: 100%;
+        min-width: 100%;
+      }
+
+      .manual-tickets-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
 
   <div class="topbar">
-    <div class="wrap">
-      <span><i class="fa-solid fa-shield-halved"></i> 100% seguro y transparente</span>
-      <span><i class="fa-solid fa-bolt"></i> Números automáticos al instante</span>
-      <span><i class="fa-solid fa-envelope"></i> Confirmación por correo y WhatsApp</span>
+    <div class="wrap" style="justify-content:center;">
+      <span><i class="fa-solid fa-crown"></i> MANGLATER</span>
     </div>
   </div>
 
   <header class="site-header">
     <div class="wrap">
       <a href="#" class="logo">
-        <img src="images/LOGO MANGLATER.jpeg" id="logoPrincipal" class="logo__imagen" alt="logo">
+        <img src="images/LOGO MANGLATER.jpeg" id="logoPrincipal" class="logo__imagen" alt="Manglater">
       </a>
       <nav class="nav">
         <ul class="nav__links">
           <li><a href="#como-funciona">Cómo funciona</a></li>
+          <li><a href="#paquetes">Paquetes</a></li>
         </ul>
         <div class="nav__actions">
           <a href="javascript:void(0)" onclick="abrirModal()" class="btn btn--primary btn--sm">
@@ -50,7 +269,7 @@
       <div class="hero__grid">
         <div class="hero__left">
           <h1><em>Honda XR 150L</em> completamente nueva.</h1>
-          <p class="lead">100.000 números disponibles. Sorteo oficial con números únicos</p>
+          <p class="lead">100.000 números disponibles. Participa con números automáticos o elige tus números favoritos.</p>
           <div class="hero__actions">
             <a href="#paquetes" class="btn btn--primary btn--sm">
               <i class="fa-solid fa-ticket"></i> Comprar mis números
@@ -59,7 +278,7 @@
           </div>
           <div class="trust-mini">
             <span><i class="fa-solid fa-circle-check"></i> Números únicos garantizados</span>
-            <span><i class="fa-solid fa-circle-check"></i> Confirmación inmediata</span>
+            <span><i class="fa-solid fa-circle-check"></i> Selección manual disponible</span>
           </div>
         </div>
 
@@ -71,11 +290,8 @@
           <div class="gauge-wrap">
             <svg id="gauge" viewBox="0 0 220 160" width="220" xmlns="http://www.w3.org/2000/svg">
               <path d="M 20 140 A 90 90 0 1 1 200 140" fill="none" stroke="rgba(243,239,230,0.10)" stroke-width="14" stroke-linecap="round"/>
-              <path id="gaugeProgress" d="M 20 140 A 90 90 0 1 1 200 140" fill="none"
-                    stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"/>
-              <line id="gaugeNeedle" x1="110" y1="110" x2="110" y2="40"
-                    stroke="var(--parchment)" stroke-width="3" stroke-linecap="round"
-                    style="transform-origin:110px 110px; transform:rotate(225deg); transition:transform 1.1s cubic-bezier(.2,.8,.2,1)"/>
+              <path id="gaugeProgress" d="M 20 140 A 90 90 0 1 1 200 140" fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"/>
+              <line id="gaugeNeedle" x1="110" y1="110" x2="110" y2="40" stroke="var(--parchment)" stroke-width="3" stroke-linecap="round" style="transform-origin:110px 110px; transform:rotate(225deg); transition:transform 1.1s cubic-bezier(.2,.8,.2,1)"/>
               <circle cx="110" cy="110" r="6" fill="var(--parchment)"/>
               <defs>
                 <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -91,36 +307,17 @@
               <div class="cap">vendido</div>
             </div>
           </div>
+
           <div class="gauge-foot">
             <div><strong id="gaugeVendidos">0</strong><span>vendidos</span></div>
             <div><strong>100.000</strong><span>total</span></div>
             <div><strong id="gaugeDisponibles">100.000</strong><span>disponibles</span></div>
           </div>
+
           <div class="countdown-chip">
             <span class="label"><i class="fa-solid fa-hourglass-half"></i> Fecha</span>
             <span class="time" id="countdownTime">Calculando...</span>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="trust-strip">
-      <div class="wrap">
-        <div class="trust-item">
-          <i class="fa-solid fa-shield-halved"></i>
-          <div><b>Compra segura</b><small>Proceso de compra 100% segura</small></div>
-        </div>
-        <div class="trust-item">
-          <i class="fa-solid fa-bolt"></i>
-          <div><b>Al instante</b><small>Números asignados automáticamente</small></div>
-        </div>
-        <div class="trust-item">
-          <i class="fa-solid fa-envelope"></i>
-          <div><b>Confirmación por email</b><small>Resumen completo de tu compra</small></div>
-        </div>
-        <div class="trust-item">
-          <i class="fa-brands fa-whatsapp"></i>
-          <div><b>Soporte WhatsApp</b><small>Respuesta en minutos</small></div>
         </div>
       </div>
     </div>
@@ -131,23 +328,24 @@
       <div class="section__head reveal">
         <p class="eyebrow">El proceso</p>
         <h2 class="section__title">Comprar es rápido y seguro.</h2>
-        <p class="section__sub">En 3 pasos tienes tus números y un correo de confirmación en tu bandeja.</p>
+        <p class="section__sub">Elige un paquete, decide si quieres números automáticos o manuales, sube tu comprobante y espera la confirmación.</p>
       </div>
+
       <div class="steps">
         <div class="step reveal">
           <div class="step__num">01</div>
           <h3>Elige tu paquete</h3>
-          <p>Selecciona cuántos números quieres. A más números, menor precio por unidad.</p>
+          <p>Selecciona 10, 30, 50 o 100 números.</p>
         </div>
         <div class="step reveal">
           <div class="step__num">02</div>
-          <h3>Realiza tu pago</h3>
-          <p>Sube tu comprobante aquí mismo.</p>
+          <h3>Escoge tu modalidad</h3>
+          <p>Puedes dejar que el sistema asigne tus números o elegirlos manualmente.</p>
         </div>
         <div class="step reveal">
           <div class="step__num">03</div>
-          <h3>Recibe tus números</h3>
-          <p>El sistema asigna tus números automáticamente. Te llegan al correo y WhatsApp al instante.</p>
+          <h3>Confirma tu compra</h3>
+          <p>Sube tu comprobante y recibe la confirmación por correo y WhatsApp.</p>
         </div>
       </div>
     </div>
@@ -157,31 +355,17 @@
     <div class="wrap">
       <div class="section__head reveal">
         <p class="eyebrow">Paquetes</p>
-        <h2 class="section__title">Más números, mejor precio por unidad.</h2>
-        <p class="section__sub">Selecciona una opción o calcula una cantidad personalizada.</p>
+        <h2 class="section__title">Selecciona tu paquete.</h2>
+        <p class="section__sub">Elige uno de los 4 paquetes disponibles.</p>
       </div>
 
       <div class="packages">
-        <div class="package-card reveal" data-qty="5" data-price="7500" onclick="selectPackage(event)">
-          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">5 <small>números</small></div>
-          <div class="package-card__price">$7.500</div>
-          <div class="package-card__unit">$1.500 c/u</div>
-        </div>
-
         <div class="package-card reveal" data-qty="10" data-price="14000" onclick="selectPackage(event)">
           <span class="package-card__badge">Promoción</span>
           <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
           <div class="package-card__qty">10 <small>números</small></div>
           <div class="package-card__price">$14.000</div>
           <div class="package-card__unit">$1.400 c/u</div>
-        </div>
-
-        <div class="package-card reveal" data-qty="20" data-price="26000" onclick="selectPackage(event)">
-          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">20 <small>números</small></div>
-          <div class="package-card__price">$26.000</div>
-          <div class="package-card__unit">$1.300 c/u</div>
         </div>
 
         <div class="package-card reveal" data-qty="30" data-price="36000" onclick="selectPackage(event)">
@@ -205,43 +389,54 @@
           <div class="package-card__price">$100.000</div>
           <div class="package-card__unit">$1.000 c/u</div>
         </div>
+      </div>
 
-        <div class="package-card reveal" data-qty="200" data-price="180000" onclick="selectPackage(event)">
-          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">200 <small>números</small></div>
-          <div class="package-card__price">$180.000</div>
-          <div class="package-card__unit">$900 c/u</div>
-        </div>
-
-        <div class="package-card reveal" data-qty="500" data-price="400000" onclick="selectPackage(event)">
-          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">500 <small>números</small></div>
-          <div class="package-card__price">$400.000</div>
-          <div class="package-card__unit">$800 c/u</div>
-        </div>
-
-        <div class="package-card reveal" data-qty="1000" data-price="700000" onclick="selectPackage(event)">
-          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">1.000 <small>números</small></div>
-          <div class="package-card__price">$700.000</div>
-          <div class="package-card__unit">$700 c/u</div>
-        </div>
-
-        <div class="package-card reveal" data-qty="5000" data-price="3000000" onclick="selectPackage(event)">
-          <span class="package-card__badge" style="background:#e8a33d;color:#1a1304;">Mayorista</span>
-          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">5.000 <small>números</small></div>
-          <div class="package-card__price">$3.000.000</div>
-          <div class="package-card__unit">$600 c/u</div>
+      <div class="selection-mode reveal" style="margin-top:30px;">
+        <h3 style="margin-bottom:14px;">¿Cómo quieres tus números?</h3>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input type="radio" name="ticketMode" value="auto" checked>
+            <span>Asignación automática</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:8px;">
+            <input type="radio" name="ticketMode" value="manual">
+            <span>Elegir mis números</span>
+          </label>
         </div>
       </div>
 
-      <div class="custom-calc reveal">
-        <div>
-          <label for="customQty">¿Otra cantidad?</label>
-          <input type="number" id="customQty" min="1" placeholder="Ej. 150">
+      <div id="manualNumbersSection" class="reveal" style="display:none; margin-top:24px;">
+        <div class="card manual-picker-card" style="padding:20px;">
+          <h3>Selecciona tus números manualmente</h3>
+          <p style="margin-bottom:12px; color:var(--dust);">
+            Debes elegir exactamente la misma cantidad del paquete seleccionado.
+          </p>
+
+          <div class="manual-picker-top">
+            <input
+              type="number"
+              id="manualNumberField"
+              min="1"
+              max="100000"
+              placeholder="Ej: 12345"
+              class="manual-number-input"
+            />
+            <button type="button" id="btnAddManualNumber" class="btn btn--primary btn--sm">
+              <i class="fa-solid fa-plus"></i> Agregar número
+            </button>
+          </div>
+
+          <small style="display:block; margin-top:10px; color:var(--dust);">
+            Rango permitido: 1 a 100000. No se permiten repetidos.
+          </small>
+
+          <div id="manualNumbersCounter" class="manual-counter">
+            0 seleccionados
+          </div>
+
+          <div id="manualTicketsPreview" class="manual-tickets-grid"></div>
+          <div id="manualNumbersHelp" style="margin-top:14px; font-size:0.95rem;"></div>
         </div>
-        <button class="btn btn--ghost btn--sm" onclick="calculateCustom()">Calcular total</button>
       </div>
 
       <div class="summary-bar reveal" id="summaryBar" style="display:none;">
@@ -291,7 +486,7 @@
             </p>
 
             <div class="qr-box">
-              <img src="images/QR DE PAGO.jpeg" alt="QR de pago" style="max-width:160px; border-radius:8px;"
+              <img src="images/QR OFICIAL.jpeg" alt="QR de pago" style="max-width:160px; border-radius:8px;"
                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
               <div style="display:none; width:160px; height:160px; background:#f0f0f0; border-radius:8px;
                           align-items:center; justify-content:center; color:#666; font-size:0.8rem; text-align:center; padding:10px;">
@@ -311,10 +506,12 @@
                 <i class="fa-solid fa-cloud-arrow-up"></i> Adjuntar Comprobante de Pago
               </div>
             </div>
+
             <div id="comprobantePreview" style="display:none; margin-top:15px; text-align:center;">
               <p style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">Comprobante seleccionado:</p>
               <img id="comprobantePreviewImg" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--line);">
             </div>
+
             <button type="submit" form="formulario-pago" class="btn btn--primary btn--block" style="margin-top:20px;">
               <i class="fa-solid fa-lock"></i> Confirmar Compra
             </button>
@@ -327,7 +524,6 @@
   <section class="section" id="premio">
     <div class="wrap">
       <div class="section__head reveal center">
-        <p class="eyebrow"></p>
         <h2 class="section__title">Conoce la Honda XR 150L.</h2>
         <p class="section__sub">La compañera perfecta para la ciudad y la trocha. Totalmente nueva y lista para rodar.</p>
       </div>
@@ -342,26 +538,11 @@
             <b>Ficha Técnica</b>
             <span>Modelo 2026</span>
           </div>
-          <div class="spec-row">
-            <span>Motor</span>
-            <span>149.1 cc</span>
-          </div>
-          <div class="spec-row">
-            <span>Transmisión</span>
-            <span>5 velocidades</span>
-          </div>
-          <div class="spec-row">
-            <span>Frenos (Del/Tras)</span>
-            <span>Disco / Tambor</span>
-          </div>
-          <div class="spec-row">
-            <span>Capacidad Tanque</span>
-            <span>12 Litros</span>
-          </div>
-          <div class="spec-row">
-            <span>Arranque</span>
-            <span>Eléctrico y Pedal</span>
-          </div>
+          <div class="spec-row"><span>Motor</span><span>149.1 cc</span></div>
+          <div class="spec-row"><span>Transmisión</span><span>5 velocidades</span></div>
+          <div class="spec-row"><span>Frenos (Del/Tras)</span><span>Disco / Tambor</span></div>
+          <div class="spec-row"><span>Capacidad Tanque</span><span>12 Litros</span></div>
+          <div class="spec-row"><span>Arranque</span><span>Eléctrico y Pedal</span></div>
           <div class="spec-note">
             * El vehículo se entrega con matrícula, SOAT y tecnomecánica al día a nombre del ganador del sorteo oficial.
           </div>
@@ -407,34 +588,9 @@
     </div>
   </footer>
 
-  <a href="https://wa.me/573017736812" target="_blank" rel="noopener noreferrer">
-    <i class="fa-brands fa-whatsapp"></i> WhatsApp
+  <a href="https://wa.me/573017736812" target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
   </a>
-
-  <style>
-    .modal-overlay {
-      display: none;
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: rgba(15, 15, 20, 0.7);
-      backdrop-filter: blur(8px);
-      z-index: 9999;
-      justify-content: center; align-items: center;
-    }
-    .modal-content {
-      background-color: #1a1c23; padding: 30px; border-radius: 12px;
-      width: 90%; max-width: 400px; text-align: center;
-      border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-      position: relative; color: #fff;
-    }
-    .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #888; transition: 0.3s; }
-    .close-btn:hover { color: #e53935; }
-    .modal-title { margin-top: 0; font-size: 1.5rem; }
-    .modal-text { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; }
-    .input-dark { width: 100%; padding: 12px; margin-bottom: 15px; background-color: #0d0e12; border: 1px solid #333; border-radius: 8px; color: #fff; outline: none; box-sizing: border-box; }
-    .input-dark:focus { border-color: #e53935; }
-    .btn-primary-modal { background-color: #c92a2a; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1rem; transition: 0.3s; }
-    .btn-primary-modal:hover { background-color: #b02525; }
-  </style>
 
   <div id="modalConsulta" class="modal-overlay">
     <div class="modal-content">
@@ -505,15 +661,10 @@
         const boletasConfirmadas = result.purchases
           .filter(p => p.status === 'confirmed' && p.boletas && p.boletas.length > 0)
           .flatMap(p => p.boletas)
-          .map(b => String(b).padStart(4, '0'))
+          .map(b => String(b).padStart(5, '0'))
           .join(', ');
 
-        if (boletasConfirmadas) {
-          textoNumeros.textContent = boletasConfirmadas;
-        } else {
-          textoNumeros.textContent = "Tienes compras pendientes de verificación. No hay números asignados aún.";
-        }
-
+        textoNumeros.textContent = boletasConfirmadas || "Tienes compras pendientes de verificación. No hay números asignados aún.";
         cajaResultado.style.display = 'block';
       } catch (error) {
         console.error('Error:', error);

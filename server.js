@@ -5,24 +5,22 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
 const ExcelJS = require('exceljs');
 
-// ✅ CONFIGURACIÓN META WHATSAPP BUSINESS API
-const WHATSAPP_ENABLED = String(process.env.WHATSAPP_ENABLED || '').toLowerCase() === 'true';
-const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID;
-const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
+const EMAIL_ENABLED = String(process.env.EMAIL_ENABLED || '').toLowerCase() === 'true';
+const EMAIL_FROM = process.env.EMAIL_FROM || 'Manglater <Manglater1225@gmail.com>';
+const EMAIL_USER = process.env.EMAIL_USER || 'Manglater1225@gmail.com';
+const EMAIL_PASS = process.env.EMAIL_PASS;
 
-// ✅ RUTAS Y DIRECTORIOS
 const APP_DIR = __dirname;
 const DB_FILE = path.join(APP_DIR, 'db.json');
 const UPLOAD_DIR = path.join(APP_DIR, 'uploads');
 const EXCEL_FILE = path.join(APP_DIR, 'purchases.xlsx');
 
-// ✅ CREAR DIRECTORIOS SI NO EXISTEN
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-// ✅ INICIALIZAR BD
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify({
     purchases: {},
@@ -33,30 +31,28 @@ if (!fs.existsSync(DB_FILE)) {
   }, null, 2));
 }
 
-// ✅ CONFIGURACIÓN EXPRESS
 const app = express();
-const PORT = process.env.PORT || process.env.MOCK_PORT || 3000;
-const HOST = process.env.MOCK_HOST || '0.0.0.0';
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ LOGGER DE REQUESTS
 app.use((req, res, next) => {
   console.log(new Date().toISOString(), req.ip, req.method, req.url);
   next();
 });
 
-// ✅ SERVIR ARCHIVOS ESTÁTICOS
 app.use('/uploads', express.static(UPLOAD_DIR));
 app.use(express.static(APP_DIR, {
   setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.js')) res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    }
   }
 }));
 
-// ✅ CONFIGURACIÓN MULTER (SUBIR ARCHIVOS)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
   filename: (req, file, cb) => {
@@ -75,7 +71,6 @@ const upload = multer({
   }
 });
 
-// ✅ FUNCIONES DE BASE DE DATOS
 function readDB() {
   try {
     const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
@@ -107,13 +102,49 @@ function writeDBAtomic(db) {
   fs.renameSync(tmp, DB_FILE);
 }
 
-// ✅ RECONSTRUIR EXCEL DESDE BD
+function parseManualNumbers(raw) {
+  try {
+    const parsed = JSON.parse(raw || '[]');
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(n => Number(n)).filter(n => Number.isInteger(n));
+  } catch (e) {
+    return [];
+  }
+}
+
+function validateManualNumbers(numbers, cantidad) {
+  if (!Array.isArray(numbers)) {
+    return { ok: false, error: 'manualNumbers inválido' };
+  }
+
+  if (numbers.length !== cantidad) {
+    return { ok: false, error: `Debes seleccionar exactamente ${cantidad} números` };
+  }
+
+  const invalid = numbers.filter(n => n < 1 || n > 100000);
+  if (invalid.length > 0) {
+    return { ok: false, error: 'Todos los números deben estar entre 1 y 100000' };
+  }
+
+  const unique = new Set(numbers);
+  if (unique.size !== numbers.length) {
+    return { ok: false, error: 'No se permiten números repetidos en selección manual' };
+  }
+
+  return { ok: true };
+}
+
 async function rebuildExcelFromDB() {
   const db = readDB();
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Compras');
-  sheet.addRow(['ID', 'Nombre', 'Cédula', 'Teléfono', 'Correo', 'Cantidad', 'Boletas', 'Total', 'Comprobante', 'Status', 'Fecha']);
-  
+
+  sheet.addRow([
+    'ID', 'Nombre', 'Cédula', 'Teléfono', 'Correo', 'Cantidad',
+    'Modo', 'Números solicitados', 'Boletas asignadas',
+    'Total', 'Comprobante', 'Status', 'Fecha'
+  ]);
+
   Object.values(db.purchases).forEach(p => {
     if (!p) return;
     sheet.addRow([
@@ -123,151 +154,117 @@ async function rebuildExcelFromDB() {
       p.celular || '',
       p.email || '',
       p.cantidad || 0,
-      (p.boletas || []).map(b => String(b).padStart(5, '0')).join(', ') || '',
+      p.ticketMode || 'auto',
+      (p.manualNumbers || []).map(b => String(b).padStart(5, '0')).join(', '),
+      (p.boletas || []).map(b => String(b).padStart(5, '0')).join(', '),
       p.total || 0,
       p.comprobanteUrl || '',
       p.status || 'pending',
       p.createdAt || ''
     ]);
   });
+
   await workbook.xlsx.writeFile(EXCEL_FILE);
 }
 
-// ✅ FUNCIÓN PARA ENVIAR WHATSAPP CON META API
-async function sendWhatsAppConfirmation(purchase) {
-  
-  // Validar que WhatsApp esté habilitado
-  if (!WHATSAPP_ENABLED) {
-    console.log('⚠️ WhatsApp DESHABILITADO en .env');
-    return { ok: false, skipped: true, error: 'WhatsApp disabled' };
-  }
+function getEmailTransporter() {
+  if (!EMAIL_ENABLED || !EMAIL_USER || !EMAIL_PASS) return null;
 
-  // Validar que tengamos las credenciales
-  if (!WHATSAPP_PHONE_ID || !WHATSAPP_ACCESS_TOKEN) {
-    console.error('❌ FALTA CONFIGURAR:');
-    console.error('   - WHATSAPP_PHONE_ID');
-    console.error('   - WHATSAPP_ACCESS_TOKEN');
-    console.error('Verifica tu archivo .env');
-    return { ok: false, skipped: true, error: 'WhatsApp credentials missing' };
-  }
-
-  // PASO 1: Limpiar el número de teléfono del cliente
-  const recipientPhone = String(purchase.celular || '').replace(/\D/g, '');
-  
-  // Validar que sea un número válido
-  if (recipientPhone.length < 10) {
-    console.error('❌ Número inválido:', purchase.celular);
-    return { ok: false, error: 'Invalid phone number' };
-  }
-
-  // PASO 2: Convertir a formato internacional (+57...)
-  let formattedPhone = recipientPhone;
-  
-  if (!formattedPhone.startsWith('57')) {
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = '57' + formattedPhone.slice(1);
-    } else if (formattedPhone.length === 10) {
-      formattedPhone = '57' + formattedPhone;
-    } else {
-      formattedPhone = '57' + formattedPhone;
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: EMAIL_USER,
+      pass: EMAIL_PASS
     }
+  });
+}
+
+async function sendPurchaseConfirmationEmail(purchase) {
+  if (!EMAIL_ENABLED) {
+    console.log('⚠️ Email deshabilitado');
+    return { ok: false, skipped: true, error: 'Email disabled' };
   }
 
-  console.log(`📞 Número original: ${purchase.celular}`);
-  console.log(`📞 Número formateado: +${formattedPhone}`);
+  if (!purchase.email) {
+    return { ok: false, error: 'Purchase has no email' };
+  }
 
-  // PASO 3: Formatear las boletas
+  const transporter = getEmailTransporter();
+  if (!transporter) {
+    return { ok: false, error: 'Email transporter not configured' };
+  }
+
   const boletas = (purchase.boletas || [])
     .map(n => String(n).padStart(5, '0'))
     .join(', ');
 
-  // PASO 4: Crear el mensaje
-  const mensajeText = `✅ *COMPRA CONFIRMADA - MANGLATER*
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#222;max-width:640px;margin:0 auto;">
+      <h2 style="color:#8a6418;margin-bottom:12px;">Confirmación de compra</h2>
 
-Hola *${purchase.nombre || 'cliente'}* 👋
+      <p>Hola <strong>${purchase.nombre || 'cliente'}</strong>,</p>
 
-Tu compra fue aprobada y tus números están listos.
+      <p>
+        Este correo confirma que tu compra fue verificada correctamente en <strong>Manglater</strong>
+        y que tus números ya fueron asignados.
+      </p>
 
-━━━━━━━━━━━━━━━━━━━━━━━━
-🧾 *ID de Compra:* ${purchase.id}
-🎟️ *Tus Boletas:* ${boletas}
-📦 *Cantidad:* ${purchase.cantidad || 0} números
-💰 *Total Pagado:* $${Number(purchase.total || 0).toLocaleString('es-CO')}
-━━━━━━━━━━━━━━━━━━━━━━━━
+      <div style="background:#f8f8f8;padding:16px 18px;border-radius:10px;border:1px solid #ddd;margin:18px 0;">
+        <p style="margin:0 0 8px;"><strong>ID de compra:</strong> ${purchase.id}</p>
+        <p style="margin:0 0 8px;"><strong>Cantidad:</strong> ${purchase.cantidad || 0}</p>
+        <p style="margin:0 0 8px;"><strong>Total registrado:</strong> $${Number(purchase.total || 0).toLocaleString('es-CO')}</p>
+        <p style="margin:0;"><strong>Números asignados:</strong> ${boletas}</p>
+      </div>
 
-¡Gracias por participar en el sorteo de la Honda XR 150L!
+      <p>
+        Si deseas consultarlos nuevamente, puedes hacerlo desde la página usando este mismo correo electrónico.
+      </p>
 
-Sorteo oficial: *15 de Agosto, 2026* a las *6:00 PM*
+      <div style="margin-top:18px;padding:12px 14px;background:#fff8e8;border:1px solid #ecd9a2;border-radius:10px;color:#5f4a12;">
+        <strong>Importante:</strong> si no vuelves a ver nuestros correos en tu bandeja principal,
+        revisa las carpetas de <strong>Spam</strong>, <strong>No deseado</strong> o <strong>Promociones</strong>
+        y marca este mensaje como seguro.
+      </div>
 
-Cualquier duda, estamos aquí 👇
-📞 *+57 301 773 6812*
+      <p style="margin-top:22px;">
+        Gracias por tu compra.
+      </p>
 
-¡Suerte! 🍀`;
+      <p style="margin-top:20px;color:#666;font-size:14px;">
+        Equipo Manglater<br>
+        Manglater1225@gmail.com
+      </p>
+    </div>
+  `;
 
-  // PASO 5: Enviar a Meta API
   try {
-    console.log(`\n📤 ENVIANDO WHATSAPP...`);
-    console.log(`   A: +${formattedPhone}`);
-    console.log(`   Cliente: ${purchase.nombre}`);
-    console.log(`   Boletas: ${boletas}`);
+    const info = await transporter.sendMail({
+      from: EMAIL_FROM,
+      to: purchase.email,
+      subject: 'Confirmación de compra y asignación de números - Manglater',
+      html,
+      text: `Hola ${purchase.nombre || 'cliente'}. Tu compra en Manglater fue verificada correctamente. ID de compra: ${purchase.id}. Números asignados: ${boletas}. Si no encuentras próximos correos en tu bandeja principal, revisa spam, no deseado o promociones.`
+    });
 
-    const response = await fetch(
-      `https://graph.instagram.com/v18.0/${WHATSAPP_PHONE_ID}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${WHATSAPP_ACCESS_TOKEN}`
-        },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          to: formattedPhone,
-          type: 'text',
-          text: {
-            body: mensajeText
-          }
-        })
-      }
-    );
-
-    // PASO 6: Procesar la respuesta
-    const result = await response.json();
-
-    if (result.messages && result.messages[0]) {
-      console.log(`✅ WhatsApp ENVIADO EXITOSAMENTE!`);
-      console.log(`   Message ID: ${result.messages[0].id}`);
-      
-      return {
-        ok: true,
-        messageId: result.messages[0].id,
-        to: formattedPhone,
-        timestamp: new Date().toISOString()
-      };
-    } else {
-      console.error(`❌ ERROR ENVIANDO WHATSAPP:`);
-      console.error(JSON.stringify(result, null, 2));
-      
-      return { 
-        ok: false, 
-        error: result.error?.message || 'Unknown error from Meta' 
-      };
-    }
-
+    return {
+      ok: true,
+      messageId: info.messageId
+    };
   } catch (e) {
-    console.error('❌ ERROR EN LA CONEXIÓN CON META API:');
-    console.error(e.message);
+    console.error('Email send error:', e.message);
     return { ok: false, error: e.message };
   }
 }
 
-// ✅ ENDPOINTS API
-
-// Health check
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, time: new Date().toISOString() });
+  res.json({
+    ok: true,
+    time: new Date().toISOString(),
+    emailEnabled: EMAIL_ENABLED,
+    emailFrom: EMAIL_FROM
+  });
 });
 
-// ✅ Endpoint de estadísticas (medidor)
 app.get('/api/stats', (req, res) => {
   try {
     const db = readDB();
@@ -288,7 +285,6 @@ app.get('/api/stats', (req, res) => {
   }
 });
 
-// ✅ Endpoint para subir comprobante
 app.post('/api/upload-comprobante', upload.single('comprobante'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ ok: false, error: 'No file uploaded' });
@@ -300,12 +296,23 @@ app.post('/api/upload-comprobante', upload.single('comprobante'), (req, res) => 
   });
 });
 
-// Crear compra
 app.post('/api/create-purchase', upload.single('comprobante'), async (req, res) => {
   try {
     const body = req.body || {};
     const file = req.file;
     const db = readDB();
+
+    const cantidad = Number(body.cantidad || 1);
+    const total = Number(body.total || 0);
+    const ticketMode = body.ticketMode === 'manual' ? 'manual' : 'auto';
+    const manualNumbers = ticketMode === 'manual' ? parseManualNumbers(body.manualNumbers) : [];
+
+    if (ticketMode === 'manual') {
+      const validation = validateManualNumbers(manualNumbers, cantidad);
+      if (!validation.ok) {
+        return res.status(400).json({ ok: false, error: validation.error });
+      }
+    }
 
     const id = 'MCK-' + Date.now();
     const purchase = {
@@ -313,9 +320,11 @@ app.post('/api/create-purchase', upload.single('comprobante'), async (req, res) 
       nombre: body.nombre || '',
       cedula: body.cedula || '',
       celular: body.celular || '',
-      email: body.email || '',
-      cantidad: Number(body.cantidad || 1),
-      total: Number(body.total || 0),
+      email: String(body.email || '').trim().toLowerCase(),
+      cantidad,
+      total,
+      ticketMode,
+      manualNumbers,
       comprobanteUrl: file ? `/uploads/${file.filename}` : '',
       status: 'pending',
       boletas: [],
@@ -326,7 +335,7 @@ app.post('/api/create-purchase', upload.single('comprobante'), async (req, res) 
     writeDBAtomic(db);
     await rebuildExcelFromDB();
 
-    console.log(`✓ Compra creada: ${id} | ${purchase.nombre} | ${purchase.celular}`);
+    console.log(`✓ Compra creada: ${id} | ${purchase.nombre} | ${purchase.email} | modo: ${ticketMode}`);
     res.json({ ok: true, purchaseId: id, purchase });
   } catch (err) {
     console.error('Create purchase error:', err);
@@ -334,7 +343,6 @@ app.post('/api/create-purchase', upload.single('comprobante'), async (req, res) 
   }
 });
 
-// Compras pendientes
 app.get('/api/pending-purchases', (req, res) => {
   try {
     const db = readDB();
@@ -345,10 +353,9 @@ app.get('/api/pending-purchases', (req, res) => {
   }
 });
 
-// Buscar por celular o cédula
 app.get('/api/my-purchases', (req, res) => {
   try {
-    const { cedula, celular, id } = req.query;
+    const { email, celular, id } = req.query;
     const db = readDB();
 
     if (id) {
@@ -359,29 +366,38 @@ app.get('/api/my-purchases', (req, res) => {
 
     if (celular) {
       const normalized = String(celular).replace(/\D/g, '');
-      const list = Object.values(db.purchases).filter(p => 
-        p && String(p.celular || '').replace(/\D/g, '') === normalized
+      const list = Object.values(db.purchases).filter(
+        p => p && String(p.celular || '').replace(/\D/g, '') === normalized
       );
       return res.json({ ok: true, purchases: list });
     }
 
-    if (!cedula) return res.status(400).json({ ok: false, error: 'cedula o celular required' });
+    if (!email) {
+      return res.status(400).json({ ok: false, error: 'email requerido' });
+    }
 
-    const list = Object.values(db.purchases).filter(p => p && p.cedula === cedula);
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const list = Object.values(db.purchases).filter(
+      p => p && String(p.email || '').trim().toLowerCase() === normalizedEmail
+    );
+
     res.json({ ok: true, purchases: list });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
 });
 
-// Admin register
 app.post('/api/admin-register', (req, res) => {
   try {
     const { username, password } = req.body || {};
-    if (!username || !password) return res.status(400).json({ ok: false, error: 'username y password requeridos' });
+    if (!username || !password) {
+      return res.status(400).json({ ok: false, error: 'username y password requeridos' });
+    }
 
     const db = readDB();
-    if (db.admins[username]) return res.status(400).json({ ok: false, error: 'ya existe' });
+    if (db.admins[username]) {
+      return res.status(400).json({ ok: false, error: 'ya existe' });
+    }
 
     db.admins[username] = { password };
     writeDBAtomic(db);
@@ -391,7 +407,6 @@ app.post('/api/admin-register', (req, res) => {
   }
 });
 
-// Admin login
 app.post('/api/admin-login', (req, res) => {
   try {
     const { username, password } = req.body || {};
@@ -415,7 +430,6 @@ app.post('/api/admin-login', (req, res) => {
 
 let confirming = false;
 
-// Confirmar compra con WhatsApp
 app.post('/api/confirm-purchase', async (req, res) => {
   try {
     const token = req.headers['x-admin-token'];
@@ -444,15 +458,37 @@ app.post('/api/confirm-purchase', async (req, res) => {
 
       const assignedNumbers = Array.isArray(db.assignedNumbers) ? db.assignedNumbers : [];
       let next = db.nextTicketNumber || 1;
-      const boletas = [];
+      let boletas = [];
       const cantidadNecesaria = purchase.cantidad || 1;
 
-      while (boletas.length < cantidadNecesaria) {
-        if (!assignedNumbers.includes(next)) {
-          boletas.push(next);
-          assignedNumbers.push(next);
+      if (purchase.ticketMode === 'manual') {
+        const manualNumbers = Array.isArray(purchase.manualNumbers) ? purchase.manualNumbers : [];
+
+        const validation = validateManualNumbers(manualNumbers, cantidadNecesaria);
+        if (!validation.ok) {
+          confirming = false;
+          return res.status(400).json({ ok: false, error: validation.error });
         }
-        next++;
+
+        const alreadyTaken = manualNumbers.filter(n => assignedNumbers.includes(n));
+        if (alreadyTaken.length > 0) {
+          confirming = false;
+          return res.status(409).json({
+            ok: false,
+            error: `Estos números ya no están disponibles: ${alreadyTaken.join(', ')}`
+          });
+        }
+
+        boletas = [...manualNumbers];
+        assignedNumbers.push(...manualNumbers);
+      } else {
+        while (boletas.length < cantidadNecesaria) {
+          if (!assignedNumbers.includes(next)) {
+            boletas.push(next);
+            assignedNumbers.push(next);
+          }
+          next++;
+        }
       }
 
       purchase.status = 'confirmed';
@@ -461,18 +497,18 @@ app.post('/api/confirm-purchase', async (req, res) => {
 
       db.assignedNumbers = assignedNumbers;
       db.purchases[purchaseId] = purchase;
-      db.nextTicketNumber = next;
+      db.nextTicketNumber = Math.max(next, db.nextTicketNumber || 1);
+
       writeDBAtomic(db);
       await rebuildExcelFromDB();
 
-      // ✅ ENVIAR WHATSAPP
-      const whatsapp = await sendWhatsAppConfirmation(purchase);
+      const emailResult = await sendPurchaseConfirmationEmail(purchase);
 
       console.log(`✓ CONFIRMADA: ${purchase.nombre} | Boletas: ${boletas.join(', ')}`);
-      console.log('📲 WhatsApp:', whatsapp);
+      console.log('📧 Email:', emailResult);
 
       confirming = false;
-      res.json({ ok: true, boletas, purchase, whatsapp });
+      res.json({ ok: true, boletas, purchase, email: emailResult });
     } catch (e) {
       confirming = false;
       throw e;
@@ -484,42 +520,40 @@ app.post('/api/confirm-purchase', async (req, res) => {
   }
 });
 
-// DB dump
 app.get('/api/db', (req, res) => {
   try {
-    res.json(readDB());
+    const db = readDB();
+    res.json({
+      purchases: db.purchases,
+      assignedNumbers: db.assignedNumbers,
+      admins: db.admins,
+      nextTicketNumber: db.nextTicketNumber
+    });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
 });
 
-// ✅ VALIDAR CONFIGURACIÓN ANTES DE INICIAR
 console.log(`\n🔧 VALIDANDO CONFIGURACIÓN...`);
 
-if (!WHATSAPP_PHONE_ID) {
-  console.error('❌ ERROR: Falta WHATSAPP_PHONE_ID en .env');
-  process.exit(1);
-}
-if (!WHATSAPP_ACCESS_TOKEN) {
-  console.error('❌ ERROR: Falta WHATSAPP_ACCESS_TOKEN en .env');
-  process.exit(1);
-}
-if (!process.env.WHATSAPP_ENABLED) {
-  console.warn('⚠️ ADVERTENCIA: WHATSAPP_ENABLED no configurado en .env');
+if (EMAIL_ENABLED) {
+  if (!EMAIL_USER) console.error('❌ ERROR: Falta EMAIL_USER');
+  if (!EMAIL_PASS) console.error('❌ ERROR: Falta EMAIL_PASS');
+  console.log(`📧 Email habilitado con ${EMAIL_USER}`);
+} else {
+  console.warn('⚠️ Email deshabilitado');
 }
 
-console.log(`✅ Configuración válida\n`);
+console.log(`✅ Configuración cargada\n`);
 
-// ✅ INICIAR SERVIDOR
 app.listen(PORT, HOST, () => {
   console.log(`\n🚀 SERVIDOR MANGLATER`);
-  console.log(`📍 URL: http://localhost:${PORT}`);
+  console.log(`📍 Host: ${HOST}`);
+  console.log(`📍 Port: ${PORT}`);
   console.log(`💾 DB: ${DB_FILE}`);
   console.log(`📂 Uploads: ${UPLOAD_DIR}`);
   console.log(`📊 Excel: ${EXCEL_FILE}`);
   console.log(`🔑 Admin: admin / admin`);
-  console.log(`\n📱 WhatsApp Config:`);
-  console.log(`   Enabled: ${WHATSAPP_ENABLED ? '✅ SÍ' : '❌ NO'}`);
-  console.log(`   Phone ID: ${WHATSAPP_PHONE_ID ? '✅ Configurado' : '❌ Falta'}`);
-  console.log(`   Token: ${WHATSAPP_ACCESS_TOKEN ? '✅ Configurado' : '❌ Falta'}\n`);
+  console.log(`📧 Email enabled: ${EMAIL_ENABLED ? '✅ SÍ' : '❌ NO'}`);
+  console.log(`📧 Email from: ${EMAIL_FROM}\n`);
 });

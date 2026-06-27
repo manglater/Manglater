@@ -1,9 +1,11 @@
 let selectedPackage = null;
 let selectedQuantity = 0;
 let selectedPrice = 0;
+let manualSelectedNumbers = [];
 
 // ── INICIALIZACIÓN ──────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('✓ App.js cargado');
   console.log('✓ App inicializado');
 
   actualizarMedidores();
@@ -13,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   setupFilePreview();
   setupContinueButton();
+  setupTicketMode();
+  setupManualPicker();
 });
 
 // ── ACTUALIZACIÓN DE MEDIDORES ──────────────
@@ -55,6 +59,187 @@ async function actualizarMedidores() {
   }
 }
 
+// ── MODO DE TICKETS ─────────────────────────
+function getTicketMode() {
+  const checked = document.querySelector('input[name="ticketMode"]:checked');
+  return checked ? checked.value : 'auto';
+}
+
+function setupTicketMode() {
+  const radios = document.querySelectorAll('input[name="ticketMode"]');
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      updateManualNumbersHelp();
+      renderManualTickets();
+    });
+  });
+
+  updateManualNumbersHelp();
+}
+
+// ── SELECTOR MANUAL VISUAL ──────────────────
+function setupManualPicker() {
+  const btn = document.getElementById('btnAddManualNumber');
+  const input = document.getElementById('manualNumberField');
+
+  if (btn) {
+    btn.addEventListener('click', addManualNumberFromInput);
+  }
+
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addManualNumberFromInput();
+      }
+    });
+  }
+
+  renderManualTickets();
+}
+
+function addManualNumberFromInput() {
+  const input = document.getElementById('manualNumberField');
+  if (!input) return;
+
+  const mode = getTicketMode();
+  if (mode !== 'manual') {
+    mostrarToast('❌ Activa primero la selección manual.', 'error');
+    return;
+  }
+
+  if (!selectedQuantity) {
+    mostrarToast('❌ Primero selecciona un paquete.', 'error');
+    return;
+  }
+
+  const value = Number(input.value);
+
+  if (!Number.isInteger(value) || value < 1 || value > 100000) {
+    mostrarToast('❌ Ingresa un número válido entre 1 y 100000.', 'error');
+    return;
+  }
+
+  if (manualSelectedNumbers.includes(value)) {
+    mostrarToast('❌ Ese número ya fue agregado.', 'error');
+    return;
+  }
+
+  if (manualSelectedNumbers.length >= selectedQuantity) {
+    mostrarToast(`❌ Solo puedes elegir ${selectedQuantity} números en este paquete.`, 'error');
+    return;
+  }
+
+  manualSelectedNumbers.push(value);
+  input.value = '';
+  renderManualTickets();
+  updateManualNumbersHelp();
+}
+
+function removeManualNumber(number) {
+  manualSelectedNumbers = manualSelectedNumbers.filter(n => n !== number);
+  renderManualTickets();
+  updateManualNumbersHelp();
+}
+
+function renderManualTickets() {
+  const grid = document.getElementById('manualTicketsPreview');
+  const counter = document.getElementById('manualNumbersCounter');
+  const section = document.getElementById('manualNumbersSection');
+  const mode = getTicketMode();
+
+  if (!grid || !counter || !section) return;
+
+  if (mode !== 'manual') {
+    section.style.display = 'none';
+    grid.innerHTML = '';
+    counter.textContent = '0 seleccionados';
+    return;
+  }
+
+  section.style.display = 'block';
+  counter.textContent = `${manualSelectedNumbers.length} seleccionados${selectedQuantity ? ` de ${selectedQuantity}` : ''}`;
+
+  if (manualSelectedNumbers.length === 0) {
+    grid.innerHTML = '';
+    return;
+  }
+
+  grid.innerHTML = manualSelectedNumbers
+    .map(number => `
+      <div class="manual-ticket">
+        <div class="manual-ticket__top">
+          <span class="manual-ticket__label">
+            <i class="fa-solid fa-ticket"></i> BOLETO
+          </span>
+          <button type="button" class="manual-ticket__remove" onclick="removeManualNumber(${number})" aria-label="Eliminar número ${number}">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="manual-ticket__number">${String(number).padStart(5, '0')}</div>
+        <div class="manual-ticket__foot">Manglater • Selección manual</div>
+      </div>
+    `)
+    .join('');
+}
+
+function validateManualNumbers() {
+  const mode = getTicketMode();
+  if (mode !== 'manual') {
+    return { ok: true, numbers: [] };
+  }
+
+  if (!selectedQuantity) {
+    return { ok: false, error: 'Primero debes seleccionar un paquete.' };
+  }
+
+  if (manualSelectedNumbers.length !== selectedQuantity) {
+    return {
+      ok: false,
+      error: `Debes elegir exactamente ${selectedQuantity} números para este paquete.`
+    };
+  }
+
+  const invalid = manualSelectedNumbers.filter(n => n < 1 || n > 100000);
+  if (invalid.length > 0) {
+    return { ok: false, error: 'Todos los números deben estar entre 1 y 100000.' };
+  }
+
+  const unique = new Set(manualSelectedNumbers);
+  if (unique.size !== manualSelectedNumbers.length) {
+    return { ok: false, error: 'No puedes repetir números.' };
+  }
+
+  return { ok: true, numbers: [...manualSelectedNumbers] };
+}
+
+function updateManualNumbersHelp() {
+  const mode = getTicketMode();
+  const help = document.getElementById('manualNumbersHelp');
+
+  if (!help) return;
+
+  if (mode !== 'manual') {
+    help.innerHTML = '';
+    return;
+  }
+
+  if (!selectedQuantity) {
+    help.innerHTML = '<span style="color:#f39c12;">Selecciona primero un paquete.</span>';
+    return;
+  }
+
+  const faltan = selectedQuantity - manualSelectedNumbers.length;
+
+  if (faltan > 0) {
+    help.innerHTML = `<span style="color:#f39c12;">Te faltan ${faltan} número(s) por elegir.</span>`;
+  } else if (faltan === 0) {
+    help.innerHTML = `<span style="color:#5c8a5f;">✓ Ya completaste tus ${selectedQuantity} números.</span>`;
+  } else {
+    help.innerHTML = `<span style="color:#e74c3c;">Tienes más números de los permitidos.</span>`;
+  }
+}
+
 // ── SELECCIÓN DE PAQUETES ───────────────────
 function selectPackage(event) {
   event.preventDefault();
@@ -69,34 +254,14 @@ function selectPackage(event) {
   selectedPrice = parseInt(element.dataset.price, 10);
   selectedPackage = element;
 
-  console.log(`📦 Paquete: ${selectedQuantity} números por $${selectedPrice}`);
-  mostrarResumen();
-}
-
-// ── CÁLCULO PERSONALIZADO ───────────────────
-function calculateCustom() {
-  const input = document.getElementById('customQty');
-  const cantidad = parseInt(input.value, 10);
-
-  if (!cantidad || cantidad < 1) {
-    mostrarToast('❌ Ingresa una cantidad válida', 'error');
-    return;
+  if (manualSelectedNumbers.length > selectedQuantity) {
+    manualSelectedNumbers = manualSelectedNumbers.slice(0, selectedQuantity);
   }
 
-  let precioUnitario = 1500;
-  if (cantidad >= 50) precioUnitario = 1400;
-  if (cantidad >= 100) precioUnitario = 1200;
-  if (cantidad >= 200) precioUnitario = 1000;
-
-  selectedQuantity = cantidad;
-  selectedPrice = cantidad * precioUnitario;
-  selectedPackage = null;
-
-  document.querySelectorAll('.package-card').forEach(card => {
-    card.classList.remove('is-selected');
-  });
-
+  console.log(`📦 Paquete: ${selectedQuantity} números por $${selectedPrice}`);
   mostrarResumen();
+  updateManualNumbersHelp();
+  renderManualTickets();
 }
 
 // ── MOSTRAR RESUMEN ─────────────────────────
@@ -118,12 +283,27 @@ function mostrarResumen() {
   }
 }
 
-// ── BOTÓN "CONTINUAR" ───────────────────────
+// ── BOTÓN CONTINUAR ─────────────────────────
 function setupContinueButton() {
   const btnContinuar = document.getElementById('btn-continuar');
   if (btnContinuar) {
     btnContinuar.addEventListener('click', (e) => {
       e.preventDefault();
+
+      if (selectedQuantity === 0) {
+        mostrarToast('❌ Primero selecciona un paquete.', 'error');
+        return;
+      }
+
+      const mode = getTicketMode();
+      if (mode === 'manual') {
+        const validation = validateManualNumbers();
+        if (!validation.ok) {
+          mostrarToast(`❌ ${validation.error}`, 'error');
+          return;
+        }
+      }
+
       const checkoutSection = document.getElementById('checkoutSection');
       if (checkoutSection) {
         checkoutSection.style.display = 'block';
@@ -150,6 +330,18 @@ async function handleFormSubmit(e) {
   if (selectedQuantity === 0) {
     mostrarToast('❌ Por favor selecciona un paquete', 'error');
     return;
+  }
+
+  const mode = getTicketMode();
+  let manualNumbers = [];
+
+  if (mode === 'manual') {
+    const validation = validateManualNumbers();
+    if (!validation.ok) {
+      mostrarToast(`❌ ${validation.error}`, 'error');
+      return;
+    }
+    manualNumbers = validation.numbers;
   }
 
   const nombre = document.getElementById('nombre')?.value.trim();
@@ -196,6 +388,8 @@ async function handleFormSubmit(e) {
     formData.append('email', email);
     formData.append('cantidad', selectedQuantity);
     formData.append('total', selectedPrice);
+    formData.append('ticketMode', mode);
+    formData.append('manualNumbers', JSON.stringify(manualNumbers));
     formData.append('comprobante', comprobante);
 
     console.log('📤 Enviando compra...');
@@ -217,10 +411,12 @@ async function handleFormSubmit(e) {
       <p>Hola <strong>${nombre}</strong>,</p>
       <p>Tu compra fue registrada con ID: <strong>${purchaseId}</strong></p>
       <p>Cantidad: <strong>${selectedQuantity} números</strong></p>
+      <p>Modo de selección: <strong>${mode === 'manual' ? 'Manual' : 'Automático'}</strong></p>
+      ${mode === 'manual' ? `<p>Números elegidos: <strong>${manualNumbers.map(n => String(n).padStart(5, '0')).join(', ')}</strong></p>` : ''}
       <p>Total: <strong>$${selectedPrice.toLocaleString('es-CO')}</strong></p>
       <p style="color: #f39c12; font-weight: bold;">⏳ Estado: PENDIENTE DE VERIFICACIÓN</p>
-      <p>Tu comprobante está siendo verificado. Te notificaremos por WhatsApp cuando se confirme y recibirás tus números de participación.</p>
-      <p style="font-size: 0.9rem; color: #888;">Revisa tu WhatsApp: <strong>${celular}</strong></p>
+      <p>Tu comprobante está siendo verificado. Te notificaremos por correo en la pestaña spam cuando se confirme y recibirás tus números de participación.</p>
+      <p style="font-size: 0.9rem; color: #888;">Revisa tu correo: <strong>${email}</strong></p>
     `);
 
     mostrarToast('✓ Compra registrada. Pendiente de verificación.', 'success');
@@ -229,6 +425,7 @@ async function handleFormSubmit(e) {
     selectedQuantity = 0;
     selectedPrice = 0;
     selectedPackage = null;
+    manualSelectedNumbers = [];
 
     document.querySelectorAll('.package-card').forEach(card => {
       card.classList.remove('is-selected');
@@ -236,15 +433,22 @@ async function handleFormSubmit(e) {
 
     const previewWrap = document.getElementById('comprobantePreview');
     const previewImg = document.getElementById('comprobantePreviewImg');
+    const summaryBar = document.getElementById('summaryBar');
+    const checkoutSection = document.getElementById('checkoutSection');
+    const help = document.getElementById('manualNumbersHelp');
+    const autoRadio = document.querySelector('input[name="ticketMode"][value="auto"]');
+    const input = document.getElementById('manualNumberField');
 
     if (previewWrap) previewWrap.style.display = 'none';
     if (previewImg) previewImg.src = '';
-
-    const summaryBar = document.getElementById('summaryBar');
     if (summaryBar) summaryBar.style.display = 'none';
-
-    const checkoutSection = document.getElementById('checkoutSection');
     if (checkoutSection) checkoutSection.style.display = 'none';
+    if (help) help.innerHTML = '';
+    if (input) input.value = '';
+    if (autoRadio) autoRadio.checked = true;
+
+    renderManualTickets();
+    updateManualNumbersHelp();
 
   } catch (error) {
     console.error('❌ Error:', error);
@@ -317,7 +521,7 @@ function mostrarRecibo(html) {
   }
 }
 
-// ── TOAST NOTIFICATIONS ─────────────────────
+// ── TOAST ───────────────────────────────────
 function mostrarToast(mensaje, tipo = 'info') {
   const toast = document.createElement('div');
   toast.className = 'toast ' + (tipo === 'success' ? 'success' : 'error');
@@ -369,7 +573,7 @@ function setupScrollReveal() {
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 }
 
-// ── PREVIEW DE COMPROBANTE ──────────────────
+// ── PREVIEW COMPROBANTE ─────────────────────
 function setupFilePreview() {
   const fileInput = document.getElementById('comprobante');
   const previewWrap = document.getElementById('comprobantePreview');
@@ -420,5 +624,3 @@ function setupFilePreview() {
     }
   });
 }
-
-console.log('✓ App.js cargado');
