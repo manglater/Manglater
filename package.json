@@ -1,33 +1,29 @@
 {
   "name": "manglater",
   "version": "1.0.0",
-  "description": "Plataforma de Rifa Honda XR 150L con WhatsApp",
+  "description": "Plataforma de WhatsApp",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "rifa",
     "boletos",
-    "whatsapp",
-    "sorteo",
-    "honda"
+    "whatsapp"
   ],
-  "author": "Manglater",
+  "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "engines": {
-    "node": ">=14.0.0",
-    "npm": ">=6.0.0"
-  },
   "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "multer": "^2.2.0",
-    "cors": "^2.8.6",
-    "uuid": "^14.0.1",
-    "exceljs": "^4.4.0",
-    "dotenv": "^17.4.2"
+    "nanoid": "^5.1.15",
+    "nodemailer": "^9.0.1",
+    "twilio": "^6.0.2",
+    "uuid": "^14.0.1"
   }
 }
