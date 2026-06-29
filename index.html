@@ -41,6 +41,39 @@
       border-color: #e8a33d;
       box-shadow: 0 0 0 3px rgba(232,163,61,0.12);
     }
+    .manual-number-status {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.manual-number-status--ok {
+  background: rgba(92, 138, 95, 0.12);
+  border: 1px solid rgba(92, 138, 95, 0.35);
+  color: #8dd694;
+}
+
+.manual-number-status--error {
+  background: rgba(216, 30, 30, 0.12);
+  border: 1px solid rgba(216, 30, 30, 0.35);
+  color: #ff8b8b;
+}
+
+.manual-number-input.is-valid {
+  border-color: #5c8a5f;
+  box-shadow: 0 0 0 3px rgba(92,138,95,0.12);
+}
+
+.manual-number-input.is-invalid {
+  border-color: #d81e1e;
+  box-shadow: 0 0 0 3px rgba(216,30,30,0.12);
+}
+
     .manual-counter {
       margin-top: 16px;
       color: #e8a33d;
@@ -383,19 +416,21 @@
             Debes elegir exactamente la misma cantidad del paquete seleccionado.
           </p>
 
-          <div class="manual-picker-top">
+         <div class="manual-picker-top">
             <input
-              type="number"
-              id="manualNumberField"
-              min="1"
-              max="100000"
-              placeholder="Ej: 12345"
-              class="manual-number-input"
-            />
-            <button type="button" id="btnAddManualNumber" class="btn btn--primary btn--sm">
-              <i class="fa-solid fa-plus"></i> Agregar número
-            </button>
-          </div>
+             type="number"
+             id="manualNumberField"
+             min="1"
+             max="100000"
+             placeholder="Ej: 12345"
+             class="manual-number-input"
+           />
+          <button type="button" id="btnAddManualNumber" class="btn btn--primary btn--sm">
+            <i class="fa-solid fa-plus"></i> Agregar número
+          </button>
+         </div>
+
+        <div id="manualNumberStatus" style="margin-top:12px;"></div>
 
           <small style="display:block; margin-top:10px; color:var(--dust);">
             Rango permitido: 1 a 100000. No se permiten repetidos.

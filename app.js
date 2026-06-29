@@ -2,6 +2,9 @@ let selectedPackage = null;
 let selectedQuantity = 0;
 let selectedPrice = 0;
 let manualSelectedNumbers = [];
+let manualNumberCheckTimeout = null;
+let lastManualAvailability = null;
+
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('✓ App.js cargado');
@@ -89,13 +92,115 @@ function setupManualPicker() {
         addManualNumberFromInput();
       }
     });
+
+    input.addEventListener('input', () => {
+      clearTimeout(manualNumberCheckTimeout);
+
+      const value = Number(input.value);
+      const status = document.getElementById('manualNumberStatus');
+
+      input.classList.remove('is-valid', 'is-invalid');
+      lastManualAvailability = null;
+
+      if (!input.value.trim()) {
+        if (status) status.innerHTML = '';
+        return;
+      }
+
+      if (!Number.isInteger(value) || value < 1 || value > 100000) {
+        input.classList.add('is-invalid');
+        if (status) {
+          status.innerHTML = `
+            <div class="manual-number-status manual-number-status--error">
+              <i class="fa-solid fa-circle-xmark"></i>
+              Número inválido. Debe estar entre 1 y 100000.
+            </div>
+          `;
+        }
+        return;
+      }
+
+      if (manualSelectedNumbers.includes(value)) {
+        input.classList.add('is-invalid');
+        if (status) {
+          status.innerHTML = `
+            <div class="manual-number-status manual-number-status--error">
+              <i class="fa-solid fa-circle-xmark"></i>
+              Ese número ya lo agregaste a tu selección.
+            </div>
+          `;
+        }
+        return;
+      }
+
+      manualNumberCheckTimeout = setTimeout(() => {
+        checkManualNumberAvailability(value);
+      }, 350);
+    });
   }
 
   renderManualTickets();
 }
 
-function addManualNumberFromInput() {
+async function checkManualNumberAvailability(number) {
   const input = document.getElementById('manualNumberField');
+  const status = document.getElementById('manualNumberStatus');
+
+  if (!input || !status) return;
+
+  try {
+    status.innerHTML = `
+      <div class="manual-number-status" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:#ddd;">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Verificando disponibilidad...
+      </div>
+    `;
+
+    const response = await fetch(`/api/check-number/${number}`);
+    const result = await response.json();
+
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || 'No se pudo verificar el número');
+    }
+
+    lastManualAvailability = result.available;
+
+    input.classList.remove('is-valid', 'is-invalid');
+
+    if (result.available) {
+      input.classList.add('is-valid');
+      status.innerHTML = `
+        <div class="manual-number-status manual-number-status--ok">
+          <i class="fa-solid fa-circle-check"></i>
+          El número ${String(number).padStart(5, '0')} está disponible.
+        </div>
+      `;
+    } else {
+      input.classList.add('is-invalid');
+      status.innerHTML = `
+        <div class="manual-number-status manual-number-status--error">
+          <i class="fa-solid fa-circle-xmark"></i>
+          El número ${String(number).padStart(5, '0')} ya fue comprado. Elige otro.
+        </div>
+      `;
+    }
+  } catch (error) {
+    input.classList.remove('is-valid', 'is-invalid');
+    input.classList.add('is-invalid');
+    lastManualAvailability = false;
+
+    status.innerHTML = `
+      <div class="manual-number-status manual-number-status--error">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        ${error.message}
+      </div>
+    `;
+  }
+}
+
+async function addManualNumberFromInput() {
+  const input = document.getElementById('manualNumberField');
+  const status = document.getElementById('manualNumberStatus');
   if (!input) return;
 
   const mode = getTicketMode();
@@ -113,11 +218,15 @@ function addManualNumberFromInput() {
 
   if (!Number.isInteger(value) || value < 1 || value > 100000) {
     mostrarToast('❌ Ingresa un número válido entre 1 y 100000.', 'error');
+    input.classList.remove('is-valid');
+    input.classList.add('is-invalid');
     return;
   }
 
   if (manualSelectedNumbers.includes(value)) {
     mostrarToast('❌ Ese número ya fue agregado.', 'error');
+    input.classList.remove('is-valid');
+    input.classList.add('is-invalid');
     return;
   }
 
@@ -126,10 +235,52 @@ function addManualNumberFromInput() {
     return;
   }
 
-  manualSelectedNumbers.push(value);
-  input.value = '';
-  renderManualTickets();
-  updateManualNumbersHelp();
+  try {
+    const response = await fetch(`/api/check-number/${value}`);
+    const result = await response.json();
+
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || 'No se pudo validar el número');
+    }
+
+    if (!result.available) {
+      input.classList.remove('is-valid');
+      input.classList.add('is-invalid');
+
+      if (status) {
+        status.innerHTML = `
+          <div class="manual-number-status manual-number-status--error">
+            <i class="fa-solid fa-circle-xmark"></i>
+            El número ${String(value).padStart(5, '0')} ya fue comprado. Elige otro.
+          </div>
+        `;
+      }
+
+      mostrarToast('❌ Ese número ya fue comprado.', 'error');
+      return;
+    }
+
+    manualSelectedNumbers.push(value);
+    input.value = '';
+    input.classList.remove('is-valid', 'is-invalid');
+    lastManualAvailability = null;
+
+    if (status) {
+      status.innerHTML = `
+        <div class="manual-number-status manual-number-status--ok">
+          <i class="fa-solid fa-circle-check"></i>
+          Número agregado correctamente.
+        </div>
+      `;
+    }
+
+    renderManualTickets();
+    updateManualNumbersHelp();
+  } catch (error) {
+    input.classList.remove('is-valid');
+    input.classList.add('is-invalid');
+    mostrarToast(`❌ ${error.message}`, 'error');
+  }
 }
 
 function removeManualNumber(number) {
@@ -179,7 +330,7 @@ function renderManualTickets() {
     .join('');
 }
 
-function validateManualNumbers() {
+async function validateManualNumbers() {
   const mode = getTicketMode();
   if (mode !== 'manual') {
     return { ok: true, numbers: [] };
@@ -204,6 +355,26 @@ function validateManualNumbers() {
   const unique = new Set(manualSelectedNumbers);
   if (unique.size !== manualSelectedNumbers.length) {
     return { ok: false, error: 'No puedes repetir números.' };
+  }
+
+  try {
+    for (const number of manualSelectedNumbers) {
+      const response = await fetch(`/api/check-number/${number}`);
+      const result = await response.json();
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error || 'No se pudo validar uno de los números');
+      }
+
+      if (!result.available) {
+        return {
+          ok: false,
+          error: `El número ${String(number).padStart(5, '0')} ya fue comprado.`
+        };
+      }
+    }
+  } catch (error) {
+    return { ok: false, error: error.message };
   }
 
   return { ok: true, numbers: [...manualSelectedNumbers] };
@@ -282,27 +453,26 @@ function setupContinueButton() {
   if (btnContinuar) {
     btnContinuar.addEventListener('click', (e) => {
       e.preventDefault();
+if (selectedQuantity === 0) {
+    mostrarToast('❌ Primero selecciona un paquete.', 'error');
+    return;
+  }
 
-      if (selectedQuantity === 0) {
-        mostrarToast('❌ Primero selecciona un paquete.', 'error');
-        return;
-      }
+  const mode = getTicketMode();
+  if (mode === 'manual') {
+    const validation =  validateManualNumbers();
+    if (!validation.ok) {
+      mostrarToast(`❌ ${validation.error}`, 'error');
+      return;
+    }
+  }
 
-      const mode = getTicketMode();
-      if (mode === 'manual') {
-        const validation = validateManualNumbers();
-        if (!validation.ok) {
-          mostrarToast(`❌ ${validation.error}`, 'error');
-          return;
-        }
-      }
-
-      const checkoutSection = document.getElementById('checkoutSection');
-      if (checkoutSection) {
-        checkoutSection.style.display = 'block';
-        checkoutSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
+  const checkoutSection = document.getElementById('checkoutSection');
+  if (checkoutSection) {
+    checkoutSection.style.display = 'block';
+    checkoutSection.scrollIntoView({ behavior: 'smooth' });
+  }
+});
   }
 }
 
@@ -327,7 +497,7 @@ async function handleFormSubmit(e) {
   let manualNumbers = [];
 
   if (mode === 'manual') {
-    const validation = validateManualNumbers();
+    const validation =  validateManualNumbers();
     if (!validation.ok) {
       mostrarToast(`❌ ${validation.error}`, 'error');
       return;

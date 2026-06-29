@@ -522,17 +522,33 @@ app.post('/api/confirm-purchase', async (req, res) => {
   }
 });
 
-app.get('/api/db', (req, res) => {
+app.get('/api/check-number/:number', (req, res) => {
   try {
+    const number = Number(req.params.number);
     const db = readDB();
+
+    if (!Number.isInteger(number) || number < 1 || number > 100000) {
+      return res.status(400).json({
+        ok: false,
+        available: false,
+        error: 'Número inválido'
+      });
+    }
+
+    const assignedNumbers = Array.isArray(db.assignedNumbers) ? db.assignedNumbers : [];
+    const available = !assignedNumbers.includes(number);
+
     res.json({
-      purchases: db.purchases,
-      assignedNumbers: db.assignedNumbers,
-      admins: db.admins,
-      nextTicketNumber: db.nextTicketNumber
+      ok: true,
+      number,
+      available
     });
   } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    res.status(500).json({
+      ok: false,
+      available: false,
+      error: e.message
+    });
   }
 });
 
