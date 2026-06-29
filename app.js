@@ -3,7 +3,6 @@ let selectedQuantity = 0;
 let selectedPrice = 0;
 let manualSelectedNumbers = [];
 
-// ── INICIALIZACIÓN ──────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   console.log('✓ App.js cargado');
   console.log('✓ App inicializado');
@@ -19,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupManualPicker();
 });
 
-// ── ACTUALIZACIÓN DE MEDIDORES ──────────────
 async function actualizarMedidores() {
   try {
     const r = await fetch('/api/stats');
@@ -59,7 +57,6 @@ async function actualizarMedidores() {
   }
 }
 
-// ── MODO DE TICKETS ─────────────────────────
 function getTicketMode() {
   const checked = document.querySelector('input[name="ticketMode"]:checked');
   return checked ? checked.value : 'auto';
@@ -77,7 +74,6 @@ function setupTicketMode() {
   updateManualNumbersHelp();
 }
 
-// ── SELECTOR MANUAL VISUAL ──────────────────
 function setupManualPicker() {
   const btn = document.getElementById('btnAddManualNumber');
   const input = document.getElementById('manualNumberField');
@@ -240,7 +236,6 @@ function updateManualNumbersHelp() {
   }
 }
 
-// ── SELECCIÓN DE PAQUETES ───────────────────
 function selectPackage(event) {
   event.preventDefault();
   const element = event.currentTarget;
@@ -264,7 +259,6 @@ function selectPackage(event) {
   renderManualTickets();
 }
 
-// ── MOSTRAR RESUMEN ─────────────────────────
 function mostrarResumen() {
   const summaryBar = document.getElementById('summaryBar');
   const summaryQty = document.getElementById('summaryQty');
@@ -283,7 +277,6 @@ function mostrarResumen() {
   }
 }
 
-// ── BOTÓN CONTINUAR ─────────────────────────
 function setupContinueButton() {
   const btnContinuar = document.getElementById('btn-continuar');
   if (btnContinuar) {
@@ -313,7 +306,6 @@ function setupContinueButton() {
   }
 }
 
-// ── CONFIGURAR LISTENERS ────────────────────
 function setupEventListeners() {
   const form = document.getElementById('formulario-pago');
   if (form) {
@@ -322,7 +314,6 @@ function setupEventListeners() {
   }
 }
 
-// ── MANEJO DEL FORMULARIO ───────────────────
 async function handleFormSubmit(e) {
   e.preventDefault();
   console.log('📋 Formulario enviado');
@@ -415,7 +406,8 @@ async function handleFormSubmit(e) {
       ${mode === 'manual' ? `<p>Números elegidos: <strong>${manualNumbers.map(n => String(n).padStart(5, '0')).join(', ')}</strong></p>` : ''}
       <p>Total: <strong>$${selectedPrice.toLocaleString('es-CO')}</strong></p>
       <p style="color: #f39c12; font-weight: bold;">⏳ Estado: PENDIENTE DE VERIFICACIÓN</p>
-      <p>Tu comprobante está siendo verificado. Te notificaremos por correo en la pestaña spam cuando se confirme y recibirás tus números de participación.</p>
+      <p>Tu comprobante está siendo verificado. Cuando se confirme la compra, recibirás un correo con tus números asignados.</p>
+      <p style="font-size: 0.9rem; color: #888;">Si no lo ves en tu bandeja principal, revisa spam, promociones o correo no deseado.</p>
       <p style="font-size: 0.9rem; color: #888;">Revisa tu correo: <strong>${email}</strong></p>
     `);
 
@@ -449,7 +441,6 @@ async function handleFormSubmit(e) {
 
     renderManualTickets();
     updateManualNumbersHelp();
-
   } catch (error) {
     console.error('❌ Error:', error);
     mostrarToast(`❌ ${error.message || 'Error al procesar la compra'}`, 'error');
@@ -461,7 +452,6 @@ async function handleFormSubmit(e) {
   }
 }
 
-// ── MOSTRAR RECIBO ──────────────────────────
 function mostrarRecibo(html) {
   const modal = document.createElement('div');
   modal.className = 'modal-recibo';
@@ -521,7 +511,6 @@ function mostrarRecibo(html) {
   }
 }
 
-// ── TOAST ───────────────────────────────────
 function mostrarToast(mensaje, tipo = 'info') {
   const toast = document.createElement('div');
   toast.className = 'toast ' + (tipo === 'success' ? 'success' : 'error');
@@ -538,7 +527,6 @@ function mostrarToast(mensaje, tipo = 'info') {
   }, 4000);
 }
 
-// ── COUNTDOWN ───────────────────────────────
 function updateCountdown() {
   const countdownEl = document.getElementById('countdownTime');
   if (!countdownEl) return;
@@ -560,7 +548,6 @@ function updateCountdown() {
   countdownEl.textContent = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
 }
 
-// ── SCROLL REVEAL ───────────────────────────
 function setupScrollReveal() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -573,7 +560,6 @@ function setupScrollReveal() {
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 }
 
-// ── PREVIEW COMPROBANTE ─────────────────────
 function setupFilePreview() {
   const fileInput = document.getElementById('comprobante');
   const previewWrap = document.getElementById('comprobantePreview');

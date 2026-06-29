@@ -480,8 +480,22 @@ header, main, footer, .wrap, .hero, .hero__panel, .site-header, .site-footer {
 .form-group input:focus { outline: none; border-color: var(--trail-gold); }
 
 /* QR / pago */
-.qr-box { background: #fff; padding: 15px; border-radius: 12px; display: inline-block; margin-bottom: 15px; }
-.qr-box img { width: 160px; height: 160px; }
+.qr-box {
+  background: transparent;
+  padding: 4px;
+  border-radius: 10px;
+  display: inline-block;
+  margin-bottom: 15px;
+  border: 1px solid #000;
+}
+
+.qr-box img {
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+  display: block;
+  border-radius: 6px;
+}
 .transfer-box {
   background: rgba(243, 239, 230, 0.03); border: 1px dashed var(--dust-dim);
   padding: 15px; border-radius: 8px; margin-bottom: 20px;

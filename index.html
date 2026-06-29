@@ -19,7 +19,6 @@
       border: 1px solid rgba(232,163,61,0.25);
       border-radius: 18px;
     }
-
     .manual-picker-top {
       display: flex;
       gap: 12px;
@@ -27,7 +26,6 @@
       align-items: center;
       margin-top: 12px;
     }
-
     .manual-number-input {
       flex: 1;
       min-width: 220px;
@@ -39,26 +37,22 @@
       outline: none;
       font-size: 1rem;
     }
-
     .manual-number-input:focus {
       border-color: #e8a33d;
       box-shadow: 0 0 0 3px rgba(232,163,61,0.12);
     }
-
     .manual-counter {
       margin-top: 16px;
       color: #e8a33d;
       font-weight: 700;
       letter-spacing: 0.5px;
     }
-
     .manual-tickets-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 14px;
       margin-top: 18px;
     }
-
     .manual-ticket {
       position: relative;
       overflow: hidden;
@@ -66,12 +60,9 @@
       padding: 18px 16px;
       background: linear-gradient(135deg, #f5d27a 0%, #dca43a 48%, #b97a17 100%);
       color: #2d1b00;
-      box-shadow:
-        0 10px 24px rgba(0,0,0,0.28),
-        inset 0 1px 0 rgba(255,255,255,0.4);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.4);
       border: 1px solid rgba(120, 73, 0, 0.35);
     }
-
     .manual-ticket::before,
     .manual-ticket::after {
       content: "";
@@ -83,10 +74,8 @@
       border-radius: 50%;
       transform: translateY(-50%);
     }
-
     .manual-ticket::before { left: -9px; }
     .manual-ticket::after { right: -9px; }
-
     .manual-ticket__top {
       display: flex;
       align-items: center;
@@ -97,13 +86,11 @@
       font-weight: 800;
       letter-spacing: 1.4px;
     }
-
     .manual-ticket__label {
       display: inline-flex;
       align-items: center;
       gap: 6px;
     }
-
     .manual-ticket__number {
       font-family: 'JetBrains Mono', monospace;
       font-size: 1.9rem;
@@ -112,13 +99,11 @@
       margin-bottom: 8px;
       word-break: break-word;
     }
-
     .manual-ticket__foot {
       font-size: 0.78rem;
       font-weight: 700;
       opacity: 0.8;
     }
-
     .manual-ticket__remove {
       border: none;
       background: rgba(45,27,0,0.12);
@@ -133,12 +118,10 @@
       justify-content: center;
       transition: 0.2s ease;
     }
-
     .manual-ticket__remove:hover {
       background: rgba(45,27,0,0.22);
       transform: scale(1.06);
     }
-
     .whatsapp-float {
       position: fixed;
       right: 18px;
@@ -157,12 +140,10 @@
       z-index: 999;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-
     .whatsapp-float:hover {
       transform: translateY(-2px) scale(1.04);
       box-shadow: 0 14px 28px rgba(0,0,0,0.35);
     }
-
     .modal-overlay {
       display: none;
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -171,23 +152,19 @@
       z-index: 9999;
       justify-content: center; align-items: center;
     }
-
     .modal-content {
       background-color: #1a1c23; padding: 30px; border-radius: 12px;
       width: 90%; max-width: 400px; text-align: center;
       border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
       position: relative; color: #fff;
     }
-
     .close-btn {
       position: absolute; top: 15px; right: 20px;
       font-size: 28px; cursor: pointer; color: #888; transition: 0.3s;
     }
-
     .close-btn:hover { color: #e53935; }
     .modal-title { margin-top: 0; font-size: 1.5rem; }
     .modal-text { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; }
-
     .input-dark {
       width: 100%;
       padding: 12px;
@@ -199,9 +176,7 @@
       outline: none;
       box-sizing: border-box;
     }
-
     .input-dark:focus { border-color: #e53935; }
-
     .btn-primary-modal {
       background-color: #c92a2a;
       color: #fff;
@@ -214,20 +189,16 @@
       font-size: 1rem;
       transition: 0.3s;
     }
-
     .btn-primary-modal:hover { background-color: #b02525; }
-
     @media (max-width: 768px) {
       .manual-picker-top {
         flex-direction: column;
         align-items: stretch;
       }
-
       .manual-number-input {
         width: 100%;
         min-width: 100%;
       }
-
       .manual-tickets-grid {
         grid-template-columns: 1fr;
       }
@@ -328,7 +299,7 @@
       <div class="section__head reveal">
         <p class="eyebrow">El proceso</p>
         <h2 class="section__title">Comprar es rápido y seguro.</h2>
-        <p class="section__sub">Elige un paquete, decide si quieres números automáticos o manuales, sube tu comprobante y espera la confirmación.</p>
+        <p class="section__sub">Elige un paquete, decide si quieres números automáticos o manuales, sube tu comprobante y espera la confirmación por correo.</p>
       </div>
 
       <div class="steps">
@@ -345,7 +316,7 @@
         <div class="step reveal">
           <div class="step__num">03</div>
           <h3>Confirma tu compra</h3>
-          <p>Sube tu comprobante y recibe la confirmación por correo y WhatsApp.</p>
+          <p>Sube tu comprobante y recibe la confirmación por correo.</p>
         </div>
       </div>
     </div>
@@ -486,9 +457,9 @@
             </p>
 
             <div class="qr-box">
-              <img src="images/QR OFICIAL.jpeg" alt="QR de pago" style="max-width:160px; border-radius:8px;"
+              <img src="images/QR OFICIAL.jpeg" alt="QR de pago" style="max-width:220px; width:100%; border-radius:10px;"
                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-              <div style="display:none; width:160px; height:160px; background:#f0f0f0; border-radius:8px;
+              <div style="display:none; width:170px; height:170px; background:#f0f0f0; border-radius:8px;
                           align-items:center; justify-content:center; color:#666; font-size:0.8rem; text-align:center; padding:10px;">
                 <div><i class="fa-solid fa-qrcode" style="font-size:2rem; color:#ccc; display:block; margin-bottom:8px;"></i>
                 Aquí va tu QR de pago</div>
@@ -595,17 +566,17 @@
   <div id="modalConsulta" class="modal-overlay">
     <div class="modal-content">
       <span class="close-btn" onclick="cerrarModal()">&times;</span>
-      <h3 class="modal-title">Consultar mi compra</h3>
-      <p class="modal-text">Ingresa tu número de cédula para ver tus números asignados.</p>
+      <h3 class="modal-title">Consultar mis números</h3>
+      <p class="modal-text">Ingresa tu correo electrónico para ver tus números asignados.</p>
 
-      <input type="text" id="inputCedula" placeholder="Tu número de cédula..." class="input-dark">
+      <input type="email" id="inputEmailLookup" placeholder="Tu correo electrónico..." class="input-dark">
       <button id="btnSearch" class="btn-primary-modal">Buscar números</button>
 
       <div id="resultadoBusqueda" style="display: none; margin-top: 20px; text-align: left; background: #0d0e12; padding: 15px; border-radius: 8px; border: 1px solid #333;">
         <h4 style="margin: 0 0 10px; color: #e8a33d; font-family: 'Oswald', sans-serif;">Números Encontrados:</h4>
-        <p id="numerosBoleto" style="margin: 0; font-size: 1.4rem; font-family: 'JetBrains Mono', monospace; color: #fff; word-wrap: break-word;"></p>
+        <p id="numerosBoleto" style="margin: 0; font-size: 1.1rem; font-family: 'JetBrains Mono', monospace; color: #fff; word-wrap: break-word;"></p>
         <span style="color: #5c8a5f; display: flex; align-items: center; gap: 5px; margin-top: 12px; font-size: 0.85rem;">
-          <i class="fa-solid fa-circle-check"></i> Pago verificado y números activos
+          <i class="fa-solid fa-circle-check"></i> Compra verificada y números activos
         </span>
       </div>
     </div>
@@ -621,7 +592,7 @@
       const modal = document.getElementById('modalConsulta');
       if (modal) {
         modal.style.display = 'none';
-        document.getElementById('inputCedula').value = '';
+        document.getElementById('inputEmailLookup').value = '';
         document.getElementById('resultadoBusqueda').style.display = 'none';
       }
     }
@@ -632,13 +603,13 @@
     });
 
     document.getElementById('btnSearch').addEventListener('click', async function() {
-      const cedulaInput = document.getElementById('inputCedula').value.trim();
+      const emailInput = document.getElementById('inputEmailLookup').value.trim();
       const btn = document.getElementById('btnSearch');
       const cajaResultado = document.getElementById('resultadoBusqueda');
       const textoNumeros = document.getElementById('numerosBoleto');
 
-      if (cedulaInput === "") {
-        alert("Por favor, ingresa un número de cédula.");
+      if (emailInput === "") {
+        alert("Por favor, ingresa tu correo electrónico.");
         return;
       }
 
@@ -647,11 +618,11 @@
       cajaResultado.style.display = 'none';
 
       try {
-        const response = await fetch(`/api/my-purchases?cedula=${encodeURIComponent(cedulaInput)}`);
+        const response = await fetch(`/api/my-purchases?email=${encodeURIComponent(emailInput)}`);
         const result = await response.json();
 
         if (!result.ok || !result.purchases || result.purchases.length === 0) {
-          textoNumeros.textContent = "No se encontraron números para esta cédula.";
+          textoNumeros.textContent = "No se encontraron compras para este correo.";
           cajaResultado.style.display = 'block';
           btn.textContent = "Buscar números";
           btn.disabled = false;
@@ -664,7 +635,7 @@
           .map(b => String(b).padStart(5, '0'))
           .join(', ');
 
-        textoNumeros.textContent = boletasConfirmadas || "Tienes compras pendientes de verificación. No hay números asignados aún.";
+        textoNumeros.textContent = boletasConfirmadas || "Tienes compras pendientes de verificación. Aún no hay números asignados.";
         cajaResultado.style.display = 'block';
       } catch (error) {
         console.error('Error:', error);
