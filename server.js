@@ -8,22 +8,11 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
 const ExcelJS = require('exceljs');
-const bcrypt = require('bcryptjs');
-const rateLimit = require('express-rate-limit');
-const { sendPurchaseConfirmationWhatsApp } = require('./whatsappService');
 
 const EMAIL_ENABLED = String(process.env.EMAIL_ENABLED || '').toLowerCase() === 'true';
 const EMAIL_FROM = process.env.EMAIL_FROM || 'Manglater <Manglater1225@gmail.com>';
 const EMAIL_USER = process.env.EMAIL_USER || 'Manglater1225@gmail.com';
 const EMAIL_PASS = process.env.EMAIL_PASS;
-
-const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000;
-const VALID_PACKAGES = {
-  10: 14000,
-  30: 36000,
-  50: 55000,
-  100: 100000
-};
 
 const APP_DIR = __dirname;
 const DB_FILE = path.join(APP_DIR, 'db.json');
@@ -36,7 +25,7 @@ if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify({
     purchases: {},
     assignedNumbers: [],
-    admins: { admin: { password: bcrypt.hashSync('admin', 10) } },
+    admins: { admin: { password: 'admin' } },
     adminTokens: {},
     nextTicketNumber: 1
   }, null, 2));
@@ -49,20 +38,6 @@ const HOST = process.env.HOST || '0.0.0.0';
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { ok: false, error: 'Demasiadas peticiones, intenta de nuevo en 15 minutos' }
-});
-
-const purchaseLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 10,
-  message: { ok: false, error: 'Demasiadas compras, intenta de nuevo en 1 hora' }
-});
 
 app.use((req, res, next) => {
   console.log(new Date().toISOString(), req.ip, req.method, req.url);
@@ -102,7 +77,7 @@ function readDB() {
     if (!data.purchases) data.purchases = {};
     if (!Array.isArray(data.assignedNumbers)) data.assignedNumbers = [];
     if (!data.admins) data.admins = {};
-    if (!data.admins.admin) data.admins.admin = { password: bcrypt.hashSync('admin', 10) };
+    if (!data.admins.admin) data.admins.admin = { password: 'admin' };
     if (!data.adminTokens) data.adminTokens = {};
     if (!data.nextTicketNumber) data.nextTicketNumber = 1;
     return data;
@@ -110,7 +85,7 @@ function readDB() {
     return {
       purchases: {},
       assignedNumbers: [],
-      admins: { admin: { password: bcrypt.hashSync('admin', 10) } },
+      admins: { admin: { password: 'admin' } },
       adminTokens: {},
       nextTicketNumber: 1
     };
@@ -125,41 +100,6 @@ function writeDBAtomic(db) {
   } catch (e) {}
   fs.writeFileSync(tmp, JSON.stringify(db, null, 2), 'utf8');
   fs.renameSync(tmp, DB_FILE);
-}
-
-function isValidAdminToken(db, token) {
-  if (!token || !db.adminTokens[token]) return false;
-  const entry = db.adminTokens[token];
-  const created = new Date(entry.createdAt).getTime();
-  if (Date.now() - created > TOKEN_EXPIRY_MS) {
-    delete db.adminTokens[token];
-    writeDBAtomic(db);
-    return false;
-  }
-  return true;
-}
-
-function cleanExpiredTokens(db) {
-  const now = Date.now();
-  let changed = false;
-  for (const [token, entry] of Object.entries(db.adminTokens || {})) {
-    if (now - new Date(entry.createdAt).getTime() > TOKEN_EXPIRY_MS) {
-      delete db.adminTokens[token];
-      changed = true;
-    }
-  }
-  if (changed) writeDBAtomic(db);
-}
-
-function migratePasswordsToHash(db) {
-  let changed = false;
-  for (const [username, admin] of Object.entries(db.admins || {})) {
-    if (admin.password && !admin.password.startsWith('$2')) {
-      admin.password = bcrypt.hashSync(admin.password, 10);
-      changed = true;
-    }
-  }
-  if (changed) writeDBAtomic(db);
 }
 
 function parseManualNumbers(raw) {
@@ -356,21 +296,16 @@ app.post('/api/upload-comprobante', upload.single('comprobante'), (req, res) => 
   });
 });
 
-app.post('/api/create-purchase', purchaseLimiter, upload.single('comprobante'), async (req, res) => {
+app.post('/api/create-purchase', upload.single('comprobante'), async (req, res) => {
   try {
     const body = req.body || {};
     const file = req.file;
     const db = readDB();
 
     const cantidad = Number(body.cantidad || 1);
+    const total = Number(body.total || 0);
     const ticketMode = body.ticketMode === 'manual' ? 'manual' : 'auto';
     const manualNumbers = ticketMode === 'manual' ? parseManualNumbers(body.manualNumbers) : [];
-
-    if (!VALID_PACKAGES[cantidad]) {
-      return res.status(400).json({ ok: false, error: 'Paquete inválido. Usa 10, 30, 50 o 100.' });
-    }
-
-    const total = VALID_PACKAGES[cantidad];
 
     if (ticketMode === 'manual') {
       const validation = validateManualNumbers(manualNumbers, cantidad);
@@ -452,15 +387,11 @@ app.get('/api/my-purchases', (req, res) => {
   }
 });
 
-app.post('/api/admin-register', apiLimiter, (req, res) => {
+app.post('/api/admin-register', (req, res) => {
   try {
     const { username, password } = req.body || {};
     if (!username || !password) {
       return res.status(400).json({ ok: false, error: 'username y password requeridos' });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ ok: false, error: 'La contraseña debe tener al menos 6 caracteres' });
     }
 
     const db = readDB();
@@ -468,7 +399,7 @@ app.post('/api/admin-register', apiLimiter, (req, res) => {
       return res.status(400).json({ ok: false, error: 'ya existe' });
     }
 
-    db.admins[username] = { password: bcrypt.hashSync(password, 10) };
+    db.admins[username] = { password };
     writeDBAtomic(db);
     res.json({ ok: true, username });
   } catch (e) {
@@ -476,17 +407,15 @@ app.post('/api/admin-register', apiLimiter, (req, res) => {
   }
 });
 
-app.post('/api/admin-login', apiLimiter, (req, res) => {
+app.post('/api/admin-login', (req, res) => {
   try {
     const { username, password } = req.body || {};
     const db = readDB();
     const admin = db.admins[username];
 
-    if (!admin || !bcrypt.compareSync(password, admin.password)) {
+    if (!admin || admin.password !== password) {
       return res.status(401).json({ ok: false, error: 'credenciales inválidas' });
     }
-
-    cleanExpiredTokens(db);
 
     const token = 'AT-' + uuidv4();
     db.adminTokens[token] = { username, createdAt: new Date().toISOString() };
@@ -506,9 +435,8 @@ app.post('/api/confirm-purchase', async (req, res) => {
     const token = req.headers['x-admin-token'];
     const db = readDB();
 
-    if (!token || !isValidAdminToken(db, token)) {
-      return res.status(401).json({ ok: false, error: 'Token de admin requerido o expirado' });
-    }
+    if (!token) return res.status(401).json({ ok: false, error: 'token requerido' });
+    if (!db.adminTokens[token]) return res.status(403).json({ ok: false, error: 'token inválido' });
 
     const { purchaseId } = req.body || {};
     if (!purchaseId) return res.status(400).json({ ok: false, error: 'purchaseId requerido' });
@@ -529,7 +457,6 @@ app.post('/api/confirm-purchase', async (req, res) => {
       }
 
       const assignedNumbers = Array.isArray(db.assignedNumbers) ? db.assignedNumbers : [];
-      let next = db.nextTicketNumber || 1;
       let boletas = [];
       const cantidadNecesaria = purchase.cantidad || 1;
 
@@ -554,12 +481,16 @@ app.post('/api/confirm-purchase', async (req, res) => {
         boletas = [...manualNumbers];
         assignedNumbers.push(...manualNumbers);
       } else {
+        const assignedSet = new Set(assignedNumbers);
+
         while (boletas.length < cantidadNecesaria) {
-          if (!assignedNumbers.includes(next)) {
-            boletas.push(next);
-            assignedNumbers.push(next);
+          const randomNumber = Math.floor(Math.random() * 100000) + 1;
+
+          if (!assignedSet.has(randomNumber)) {
+            boletas.push(randomNumber);
+            assignedNumbers.push(randomNumber);
+            assignedSet.add(randomNumber);
           }
-          next++;
         }
       }
 
@@ -569,20 +500,17 @@ app.post('/api/confirm-purchase', async (req, res) => {
 
       db.assignedNumbers = assignedNumbers;
       db.purchases[purchaseId] = purchase;
-      db.nextTicketNumber = Math.max(next, db.nextTicketNumber || 1);
 
       writeDBAtomic(db);
       await rebuildExcelFromDB();
 
       const emailResult = await sendPurchaseConfirmationEmail(purchase);
-      const whatsappResult = await sendPurchaseConfirmationWhatsApp(purchase);
 
       console.log(`✓ CONFIRMADA: ${purchase.nombre} | Boletas: ${boletas.join(', ')}`);
       console.log('📧 Email:', emailResult);
-      console.log('📱 WhatsApp:', whatsappResult);
 
       confirming = false;
-      res.json({ ok: true, boletas, purchase, email: emailResult, whatsapp: whatsappResult });
+      res.json({ ok: true, boletas, purchase, email: emailResult });
     } catch (e) {
       confirming = false;
       throw e;
@@ -596,22 +524,11 @@ app.post('/api/confirm-purchase', async (req, res) => {
 
 app.get('/api/db', (req, res) => {
   try {
-    const token = req.headers['x-admin-token'];
     const db = readDB();
-
-    if (!token || !isValidAdminToken(db, token)) {
-      return res.status(401).json({ ok: false, error: 'Token de admin requerido o expirado' });
-    }
-
-    const sanitizedAdmins = {};
-    for (const [u, a] of Object.entries(db.admins || {})) {
-      sanitizedAdmins[u] = { password: '***' };
-    }
-
     res.json({
       purchases: db.purchases,
       assignedNumbers: db.assignedNumbers,
-      admins: sanitizedAdmins,
+      admins: db.admins,
       nextTicketNumber: db.nextTicketNumber
     });
   } catch (e) {
@@ -620,10 +537,6 @@ app.get('/api/db', (req, res) => {
 });
 
 console.log(`\n🔧 VALIDANDO CONFIGURACIÓN...`);
-
-const startupDb = readDB();
-migratePasswordsToHash(startupDb);
-cleanExpiredTokens(readDB());
 
 if (EMAIL_ENABLED) {
   if (!EMAIL_USER) console.error('❌ ERROR: Falta EMAIL_USER');
