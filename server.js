@@ -25,7 +25,11 @@ if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify({
     purchases: {},
     assignedNumbers: [],
-    admins: { admin: { password: 'admin' } },
+    admins: {
+      admin: { password: 'admin' },
+      admin1: { password: 'admin1' },
+      admin2: { password: 'admin2' }
+    },
     adminTokens: {},
     nextTicketNumber: 1
   }, null, 2));
@@ -78,6 +82,8 @@ function readDB() {
     if (!Array.isArray(data.assignedNumbers)) data.assignedNumbers = [];
     if (!data.admins) data.admins = {};
     if (!data.admins.admin) data.admins.admin = { password: 'admin' };
+    if (!data.admins.admin1) data.admins.admin1 = { password: 'admin1' };
+    if (!data.admins.admin2) data.admins.admin2 = { password: 'admin2' };
     if (!data.adminTokens) data.adminTokens = {};
     if (!data.nextTicketNumber) data.nextTicketNumber = 1;
     return data;
@@ -85,7 +91,11 @@ function readDB() {
     return {
       purchases: {},
       assignedNumbers: [],
-      admins: { admin: { password: 'admin' } },
+      admins: {
+        admin: { password: 'admin' },
+        admin1: { password: 'admin1' },
+        admin2: { password: 'admin2' }
+      },
       adminTokens: {},
       nextTicketNumber: 1
     };
@@ -140,7 +150,7 @@ async function rebuildExcelFromDB() {
   const sheet = workbook.addWorksheet('Compras');
 
   sheet.addRow([
-    'ID', 'Nombre', 'Cédula', 'Teléfono', 'Correo', 'Cantidad',
+    'ID', 'Nombre', 'Cédula', 'Teléfono', 'Correo', 'Ciudad', 'Cantidad',
     'Modo', 'Números solicitados', 'Boletas asignadas',
     'Total', 'Comprobante', 'Status', 'Fecha'
   ]);
@@ -153,6 +163,7 @@ async function rebuildExcelFromDB() {
       p.cedula || '',
       p.celular || '',
       p.email || '',
+      p.ciudad || '',
       p.cantidad || 0,
       p.ticketMode || 'auto',
       (p.manualNumbers || []).map(b => String(b).padStart(5, '0')).join(', '),
@@ -304,10 +315,10 @@ app.post('/api/create-purchase', upload.single('comprobante'), async (req, res) 
 
     const cantidad = Number(body.cantidad || 1);
     const total = Number(body.total || 0);
-    const ticketMode = body.ticketMode === 'manual' ? 'manual' : 'auto';
-    const manualNumbers = ticketMode === 'manual' ? parseManualNumbers(body.manualNumbers) : [];
+    const ticketMode = body.ticketMode === 'manual' || body.ticketMode === 'visual' ? body.ticketMode : 'auto';
+    const manualNumbers = (ticketMode === 'manual' || ticketMode === 'visual') ? parseManualNumbers(body.manualNumbers) : [];
 
-    if (ticketMode === 'manual') {
+    if (ticketMode === 'manual' || ticketMode === 'visual') {
       const validation = validateManualNumbers(manualNumbers, cantidad);
       if (!validation.ok) {
         return res.status(400).json({ ok: false, error: validation.error });
@@ -321,6 +332,7 @@ app.post('/api/create-purchase', upload.single('comprobante'), async (req, res) 
       cedula: body.cedula || '',
       celular: body.celular || '',
       email: String(body.email || '').trim().toLowerCase(),
+      ciudad: body.ciudad || '',
       cantidad,
       total,
       ticketMode,
@@ -460,7 +472,7 @@ app.post('/api/confirm-purchase', async (req, res) => {
       let boletas = [];
       const cantidadNecesaria = purchase.cantidad || 1;
 
-      if (purchase.ticketMode === 'manual') {
+      if (purchase.ticketMode === 'manual' || purchase.ticketMode === 'visual') {
         const manualNumbers = Array.isArray(purchase.manualNumbers) ? purchase.manualNumbers : [];
 
         const validation = validateManualNumbers(manualNumbers, cantidadNecesaria);
@@ -549,6 +561,105 @@ app.get('/api/check-number/:number', (req, res) => {
       available: false,
       error: e.message
     });
+  }
+});
+
+app.get('/api/assigned-numbers', (req, res) => {
+  try {
+    const db = readDB();
+    res.json({ ok: true, assignedNumbers: db.assignedNumbers || [] });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.get('/api/admin-search-by-ticket', (req, res) => {
+  try {
+    const token = req.headers['x-admin-token'];
+    if (!token) return res.status(401).json({ ok: false, error: 'token requerido' });
+
+    const db = readDB();
+    if (!db.adminTokens[token]) return res.status(403).json({ ok: false, error: 'token inválido' });
+
+    const { number } = req.query;
+    if (!number) {
+      return res.status(400).json({ ok: false, error: 'número de ticket requerido' });
+    }
+
+    const ticketNum = Number(number);
+    if (!Number.isInteger(ticketNum) || ticketNum < 1 || ticketNum > 100000) {
+      return res.status(400).json({ ok: false, error: 'Número de ticket inválido (1-100000)' });
+    }
+
+    const results = Object.values(db.purchases).filter(p => {
+      if (!p) return false;
+      const boletas = Array.isArray(p.boletas) ? p.boletas : [];
+      const manualNums = Array.isArray(p.manualNumbers) ? p.manualNumbers : [];
+      return boletas.includes(ticketNum) || manualNums.includes(ticketNum);
+    });
+
+    res.json({ ok: true, purchases: results, ticketNumber: ticketNum });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.post('/api/update-purchase-field', (req, res) => {
+  try {
+    const token = req.headers['x-admin-token'];
+    if (!token) return res.status(401).json({ ok: false, error: 'token requerido' });
+
+    const db = readDB();
+    if (!db.adminTokens[token]) return res.status(403).json({ ok: false, error: 'token inválido' });
+
+    const { purchaseId, field, value } = req.body || {};
+    if (!purchaseId || !field) {
+      return res.status(400).json({ ok: false, error: 'purchaseId y field requeridos' });
+    }
+
+    const allowedFields = ['ciudad', 'nombre', 'cedula', 'celular', 'email'];
+    if (!allowedFields.includes(field)) {
+      return res.status(400).json({ ok: false, error: 'Campo no permitido para edición' });
+    }
+
+    const purchase = db.purchases[purchaseId];
+    if (!purchase) {
+      return res.status(404).json({ ok: false, error: 'Compra no encontrada' });
+    }
+
+    purchase[field] = value;
+    db.purchases[purchaseId] = purchase;
+    writeDBAtomic(db);
+    rebuildExcelFromDB();
+
+    console.log(`✓ Campo actualizado: ${purchaseId} → ${field} = "${value}"`);
+    res.json({ ok: true, purchase });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.get('/api/admin-search-by-name', (req, res) => {
+  try {
+    const token = req.headers['x-admin-token'];
+    if (!token) return res.status(401).json({ ok: false, error: 'token requerido' });
+
+    const db = readDB();
+    if (!db.adminTokens[token]) return res.status(403).json({ ok: false, error: 'token inválido' });
+
+    const { name } = req.query;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ ok: false, error: 'nombre requerido' });
+    }
+
+    const query = name.trim().toLowerCase();
+    const results = Object.values(db.purchases).filter(p => {
+      return p && p.nombre && p.nombre.toLowerCase().includes(query);
+    });
+
+    res.json({ ok: true, purchases: results });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
   }
 });
 

@@ -431,15 +431,259 @@ header, main, footer, .wrap, .hero, .hero__panel, .site-header, .site-footer {
 
 /* Calculadora personalizada */
 .custom-calc {
-  background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-m);
-  padding: 22px 24px; display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;
+  background: linear-gradient(135deg, var(--surface-2), var(--surface));
+  border: 1px solid rgba(232, 163, 61, 0.25);
+  border-radius: var(--radius-l);
+  padding: 28px 30px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
 }
-.custom-calc label { display: block; font-size: 0.82rem; color: var(--dust); margin-bottom: 8px; }
+.custom-calc::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(232,163,61,0.1), transparent 70%);
+  pointer-events: none;
+}
+.custom-calc__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--honda-red), var(--honda-red-dim));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.custom-calc__body {
+  flex: 1;
+  min-width: 280px;
+}
+.custom-calc__label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--parchment);
+  margin-bottom: 14px;
+}
+.custom-calc__row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.custom-calc__input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: rgba(10,10,10,0.3);
+  padding: 8px 16px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--line);
+}
+.custom-calc__input-group:focus-within {
+  border-color: var(--trail-gold);
+  box-shadow: 0 0 0 3px rgba(232,163,61,0.1);
+}
 .custom-calc input {
-  background: var(--asphalt); border: 1px solid var(--line); border-radius: var(--radius-s);
-  padding: 11px 14px; color: var(--parchment); font-family: var(--font-mono); font-size: 0.95rem; width: 140px;
+  background: transparent;
+  border: none;
+  padding: 8px 4px;
+  color: var(--parchment);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  width: 100px;
+  outline: none;
 }
-.custom-calc input:focus { outline: none; border-color: var(--trail-gold); }
+.custom-calc__multiply {
+  color: var(--dust-dim);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.custom-calc__unit-price {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--trail-gold);
+}
+.custom-calc__equals {
+  color: var(--dust-dim);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.custom-calc__hint {
+  display: block;
+  margin-top: 12px;
+  color: var(--dust-dim);
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.custom-calc__hint i {
+  color: var(--trail-gold);
+}
+
+/* =============================================
+   MODO DE SELECCIÓN - TARJETAS MEJORADAS
+   ============================================= */
+.selection-mode {
+  margin-top: 30px;
+}
+.selection-mode__title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: var(--parchment);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.selection-mode__title i {
+  color: var(--trail-gold);
+}
+.selection-mode__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.selection-mode__option {
+  position: relative;
+}
+.selection-mode__option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.selection-mode__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 22px 18px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.selection-mode__label:hover {
+  border-color: var(--dust-dim);
+  background: var(--surface-2);
+}
+.selection-mode__label .icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+}
+.selection-mode__label .icon--auto {
+  background: rgba(92,138,95,0.12);
+  color: var(--trail-green);
+  border: 1px solid rgba(92,138,95,0.3);
+}
+.selection-mode__label .icon--manual {
+  background: rgba(232,163,61,0.12);
+  color: var(--trail-gold);
+  border: 1px solid rgba(232,163,61,0.3);
+}
+.selection-mode__label .icon--visual {
+  background: rgba(216,30,30,0.12);
+  color: var(--honda-red);
+  border: 1px solid rgba(216,30,30,0.3);
+}
+.selection-mode__label .label-text {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--parchment);
+}
+.selection-mode__label .label-desc {
+  font-size: 0.78rem;
+  color: var(--dust);
+  line-height: 1.4;
+}
+.selection-mode__option input[type="radio"]:checked + .selection-mode__label {
+  border-color: var(--trail-gold);
+  background: linear-gradient(180deg, rgba(232,163,61,0.08), var(--surface) 60%);
+  box-shadow: 0 0 0 3px rgba(232,163,61,0.12);
+}
+.selection-mode__option input[type="radio"]:checked + .selection-mode__label .icon--auto {
+  background: var(--trail-green);
+  color: #fff;
+  border-color: var(--trail-green);
+}
+.selection-mode__option input[type="radio"]:checked + .selection-mode__label .icon--manual {
+  background: var(--trail-gold);
+  color: #1a1304;
+  border-color: var(--trail-gold);
+}
+.selection-mode__option input[type="radio"]:checked + .selection-mode__label .icon--visual {
+  background: var(--honda-red);
+  color: #fff;
+  border-color: var(--honda-red);
+}
+
+/* =============================================
+   BOLETO VENDIDO (ROJO / TACHADO)
+   ============================================= */
+.manual-ticket.is-sold {
+  background: linear-gradient(135deg, #8b1a1a 0%, #6b1010 48%, #4a0808 100%) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(200, 50, 50, 0.4) !important;
+  text-decoration: line-through;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.manual-ticket.is-sold .manual-ticket__number {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.4);
+}
+.manual-ticket.is-sold .manual-ticket__label i {
+  color: rgba(255, 80, 80, 0.6);
+}
+.visual-ticket.is-unavailable {
+  background: linear-gradient(135deg, #8b1a1a 0%, #6b1010 48%, #4a0808 100%) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(200, 50, 50, 0.4) !important;
+  text-decoration: line-through;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.visual-ticket.is-unavailable .visual-ticket__number {
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.4);
+}
+.visual-ticket.is-unavailable::before,
+.visual-ticket.is-unavailable::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  background: #16181d;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.visual-ticket.is-unavailable::before { left: -7px; }
+.visual-ticket.is-unavailable::after { right: -7px; }
 
 /* Barra de resumen */
 .summary-bar {

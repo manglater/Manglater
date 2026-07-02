@@ -223,6 +223,149 @@
       transition: 0.3s;
     }
     .btn-primary-modal:hover { background-color: #b02525; }
+    /* Quick buy custom quantity */
+    .custom-qty-wrap {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(232,163,61,0.25);
+      border-radius: 18px;
+      padding: 22px 24px;
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .custom-qty-wrap label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--dust);
+      margin-bottom: 8px;
+    }
+    .custom-qty-input {
+      background: rgba(10,10,10,0.35);
+      border: 1px solid rgba(232,163,61,0.25);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--parchment);
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      width: 160px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .custom-qty-input:focus {
+      border-color: #e8a33d;
+      box-shadow: 0 0 0 3px rgba(232,163,61,0.12);
+    }
+    .custom-qty-price {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--trail-gold);
+      white-space: nowrap;
+    }
+
+    /* Visual grid tickets */
+    .visual-tickets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+      max-height: 600px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .visual-ticket {
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      padding: 12px 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(243,239,230,0.10);
+      color: var(--dust);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      user-select: none;
+    }
+    .visual-ticket:hover {
+      border-color: var(--dust-dim);
+      background: rgba(255,255,255,0.07);
+    }
+    .visual-ticket.is-selected {
+      background: linear-gradient(135deg, #f5d27a 0%, #dca43a 48%, #b97a17 100%);
+      color: #2d1b00;
+      border-color: rgba(120, 73, 0, 0.35);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+    .visual-ticket.is-selected::before,
+    .visual-ticket.is-selected::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      background: #16181d;
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+    .visual-ticket.is-selected::before { left: -7px; }
+    .visual-ticket.is-selected::after { right: -7px; }
+    .visual-ticket__number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .visual-ticket__check {
+      display: none;
+      font-size: 0.7rem;
+      margin-top: 4px;
+    }
+    .visual-ticket.is-selected .visual-ticket__check {
+      display: block;
+    }
+    .visual-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .visual-pagination button {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(243,239,230,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--dust);
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      transition: all 0.12s;
+    }
+    .visual-pagination button:hover {
+      border-color: var(--dust-dim);
+      color: var(--parchment);
+    }
+    .visual-pagination button.is-active {
+      background: var(--trail-gold);
+      color: #1a1304;
+      border-color: var(--trail-gold);
+    }
+    .visual-pagination button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .visual-stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: var(--dust);
+    }
+    .visual-stats span { display: flex; align-items: center; gap: 6px; }
+    .visual-stats .num { font-weight: 700; color: var(--parchment); font-family: var(--font-mono); }
+
     @media (max-width: 768px) {
       .manual-picker-top {
         flex-direction: column;
@@ -234,6 +377,10 @@
       }
       .manual-tickets-grid {
         grid-template-columns: 1fr;
+      }
+      .visual-tickets-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        max-height: 400px;
       }
     }
   </style>
@@ -360,52 +507,107 @@
       <div class="section__head reveal">
         <p class="eyebrow">Paquetes</p>
         <h2 class="section__title">Selecciona tu paquete.</h2>
-        <p class="section__sub">Elige uno de los 4 paquetes disponibles.</p>
+        <p class="section__sub">Elige uno de los 5 paquetes disponibles o usa la compra rápida.</p>
       </div>
 
       <div class="packages">
-        <div class="package-card reveal" data-qty="10" data-price="14000" onclick="selectPackage(event)">
+        <div class="package-card reveal" data-qty="50" data-price="10000" onclick="selectPackage(event)">
           <span class="package-card__badge">Promoción</span>
           <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">10 <small>números</small></div>
-          <div class="package-card__price">$14.000</div>
-          <div class="package-card__unit">$1.400 c/u</div>
-        </div>
-
-        <div class="package-card reveal" data-qty="30" data-price="36000" onclick="selectPackage(event)">
-          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
-          <div class="package-card__qty">30 <small>números</small></div>
-          <div class="package-card__price">$36.000</div>
-          <div class="package-card__unit">$1.200 c/u</div>
-        </div>
-
-        <div class="package-card reveal" data-qty="50" data-price="55000" onclick="selectPackage(event)">
-          <span class="package-card__badge" style="background:var(--honda-red);color:#fff;">Popular</span>
-          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
           <div class="package-card__qty">50 <small>números</small></div>
-          <div class="package-card__price">$55.000</div>
-          <div class="package-card__unit">$1.100 c/u</div>
+          <div class="package-card__price">$10.000</div>
+          <div class="package-card__unit">$200 c/u</div>
         </div>
 
-        <div class="package-card reveal" data-qty="100" data-price="100000" onclick="selectPackage(event)">
+        <div class="package-card reveal" data-qty="100" data-price="20000" onclick="selectPackage(event)">
           <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
           <div class="package-card__qty">100 <small>números</small></div>
-          <div class="package-card__price">$100.000</div>
-          <div class="package-card__unit">$1.000 c/u</div>
+          <div class="package-card__price">$20.000</div>
+          <div class="package-card__unit">$200 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="150" data-price="30000" onclick="selectPackage(event)">
+          <span class="package-card__badge" style="background:var(--honda-red);color:#fff;">Popular</span>
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">150 <small>números</small></div>
+          <div class="package-card__price">$30.000</div>
+          <div class="package-card__unit">$200 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="200" data-price="40000" onclick="selectPackage(event)">
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">200 <small>números</small></div>
+          <div class="package-card__price">$40.000</div>
+          <div class="package-card__unit">$200 c/u</div>
+        </div>
+
+        <div class="package-card reveal" data-qty="1000" data-price="200000" onclick="selectPackage(event)">
+          <span class="package-card__badge" style="background:var(--trail-gold);color:#1a1304;">Super</span>
+          <span class="package-card__check"><i class="fa-solid fa-check"></i></span>
+          <div class="package-card__qty">1000 <small>números</small></div>
+          <div class="package-card__price">$200.000</div>
+          <div class="package-card__unit">$200 c/u</div>
         </div>
       </div>
 
-      <div class="selection-mode reveal" style="margin-top:30px;">
-        <h3 style="margin-bottom:14px;">¿Cómo quieres tus números?</h3>
-        <div style="display:flex; gap:12px; flex-wrap:wrap;">
-          <label style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="ticketMode" value="auto" checked>
-            <span>Asignación automática</span>
-          </label>
-          <label style="display:flex; align-items:center; gap:8px;">
-            <input type="radio" name="ticketMode" value="manual">
-            <span>Elegir mis números</span>
-          </label>
+      <div class="custom-calc reveal" style="margin-top:24px;">
+        <div class="custom-calc__icon">
+          <i class="fa-solid fa-cart-plus"></i>
+        </div>
+        <div class="custom-calc__body">
+          <label class="custom-calc__label">Compra rápida — cantidad personalizada</label>
+          <div class="custom-calc__row">
+            <div class="custom-calc__input-group">
+              <input type="number" id="customQuantity" min="1" max="100000" placeholder="Ej: 1000" class="custom-qty-input" />
+              <span class="custom-calc__multiply">×</span>
+              <span class="custom-calc__unit-price">$200</span>
+              <span class="custom-calc__equals">=</span>
+              <strong id="customPriceDisplay" class="custom-qty-price">$0</strong>
+            </div>
+          </div>
+          <small class="custom-calc__hint">
+            <i class="fa-solid fa-info-circle"></i>
+            Escribe cualquier cantidad entre 1 y 100.000. Precio unitario: $200 COP por número.
+          </small>
+        </div>
+      </div>
+
+      <div class="selection-mode reveal">
+        <h3 class="selection-mode__title">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          ¿Cómo quieres tus números?
+        </h3>
+        <div class="selection-mode__options">
+          <div class="selection-mode__option">
+            <input type="radio" name="ticketMode" value="auto" id="modeAuto" checked>
+            <label class="selection-mode__label" for="modeAuto">
+              <div class="icon icon--auto">
+                <i class="fa-solid fa-shuffle"></i>
+              </div>
+              <span class="label-text">Asignación automática</span>
+              <span class="label-desc">El sistema elige tus números al azar</span>
+            </label>
+          </div>
+          <div class="selection-mode__option">
+            <input type="radio" name="ticketMode" value="manual" id="modeManual">
+            <label class="selection-mode__label" for="modeManual">
+              <div class="icon icon--manual">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </div>
+              <span class="label-text">Elegir manualmente</span>
+              <span class="label-desc">Escribe tus números favoritos uno por uno</span>
+            </label>
+          </div>
+          <div class="selection-mode__option">
+            <input type="radio" name="ticketMode" value="visual" id="modeVisual">
+            <label class="selection-mode__label" for="modeVisual">
+              <div class="icon icon--visual">
+                <i class="fa-solid fa-table-cells-large"></i>
+              </div>
+              <span class="label-text">Selección visual</span>
+              <span class="label-desc">Explora y elige desde la cuadrícula interactiva</span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -445,6 +647,26 @@
         </div>
       </div>
 
+      <div id="visualModeSection" class="reveal" style="display:none; margin-top:24px;">
+        <div class="card manual-picker-card" style="padding:20px;">
+          <h3>Selección visual de boletos</h3>
+          <p style="margin-bottom:12px; color:var(--dust);">
+            Haz clic en los números disponibles para seleccionarlos. Los números ya vendidos aparecen tachados.
+          </p>
+
+          <div id="visualStats" class="visual-stats">
+            <span><i class="fa-solid fa-check-circle" style="color:var(--trail-gold);"></i> Seleccionados: <span id="visualSelectedCount" class="num">0</span></span>
+            <span><i class="fa-solid fa-times-circle" style="color:#d81e1e;"></i> <span id="visualTotalSelected" class="num">0</span></span>
+          </div>
+
+          <div id="visualTicketsGrid" class="visual-tickets-grid"></div>
+
+          <div id="visualPagination" class="visual-pagination"></div>
+
+          <div id="visualNumbersHelp" style="margin-top:14px; font-size:0.95rem;"></div>
+        </div>
+      </div>
+
       <div class="summary-bar reveal" id="summaryBar" style="display:none;">
         <div class="qty">Números seleccionados <b id="summaryQty">0</b></div>
         <div class="total" id="summaryTotal">$0</div>
@@ -481,6 +703,11 @@
               <div class="form-group">
                 <label for="emailConfirm">Confirmar Correo *</label>
                 <input type="email" id="emailConfirm" required placeholder="Repite tu correo">
+              </div>
+
+              <div class="form-group">
+                <label for="ciudad">Ciudad *</label>
+                <input type="text" id="ciudad" required placeholder="Ej. Medellín">
               </div>
             </form>
           </div>
